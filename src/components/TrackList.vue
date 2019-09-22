@@ -3,10 +3,10 @@
     <div class="trackControl is-marginless level">
       <div class="level-left">
         <div class="level-item">
-          <p class="has-text-weight-bold">Tracks</p>
+          <p class="subtitle is-5 has-text-weight-bold">Tracks</p>
         </div>
         <div class="level-item">
-          <span class="tag is-rounded has-text-weight-bold has-text-primary"
+          <span class="tag is-rounded has-text-primary"
             >{{ trackList.length }} tracks</span
           >
         </div>
@@ -21,7 +21,7 @@
       <div
         class="track-item"
         :class="[
-          item === activeTrack && 'has-background-primary has-text-white'
+          item === activeTrack && 'has-text-primary has-text-weight-medium'
         ]"
         v-for="(item, index) in trackList"
         :key="item"
@@ -42,20 +42,27 @@ export default {
   },
   methods: {
     selectTrack(index) {
+      const mappedIndex = this.currentState.matches("shuffle.on")
+        ? this.currentState.context.trackOrder.indexOf(index)
+        : index;
       this.send({
         type: "SELECT_TRACK",
-        index
+        index: mappedIndex
       });
     }
   },
   computed: {
     trackList() {
-      return this.currentState.context.tracks.map(f => f.name);
+      const { tracks, trackOrder } = this.currentState.context;
+      if (this.currentState.matches("shuffle.on")) {
+        return trackOrder.map(index => tracks[index].name);
+      } else {
+        return tracks.map(f => f.name);
+      }
     },
     activeTrack() {
-      return this.currentState.context.tracks[
-        this.currentState.context.currentTrackIndex
-      ].name;
+      const { tracks, currentTrackIndex } = this.currentState.context;
+      return tracks[currentTrackIndex].name;
     }
   }
 };
@@ -73,20 +80,19 @@ export default {
 .track-item {
   box-sizing: border-box;
   margin-bottom: -1px;
-  padding: 1rem;
+  padding: 0.75rem;
   border: 1px transparent solid;
   border-bottom: 1px lightgrey solid;
   border-radius: $radius-small;
   cursor: pointer;
 
   &:hover {
-    border: 1px $primary solid;
-    color: $primary;
+    background-color: $grey-lighter;
   }
 }
 .trackControl {
   padding: 0.5rem;
   padding-top: 0;
-  border-bottom: 2px $grey-dark solid;
+  border-bottom: 2px $grey solid;
 }
 </style>

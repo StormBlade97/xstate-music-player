@@ -1,7 +1,7 @@
 <template>
   <div class="box is-shadowless has-background-grey-light track-art">
     <progress
-      class="progressBar progress"
+      class="progressBar progress is-primary"
       :value="currentProgress"
       max="100"
     ></progress>

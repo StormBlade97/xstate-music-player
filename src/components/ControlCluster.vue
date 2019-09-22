@@ -38,7 +38,7 @@
       <div class="control">
         <div class="field has-addons">
           <p class="control">
-            <a class="button is-medium">
+            <a class="button is-medium" @click="() => this.send('PREV')">
               <span class="icon">
                 <i class="bx bx-skip-previous"></i>
               </span>
@@ -71,7 +71,7 @@
             </a>
           </p>
           <p class="control">
-            <a class="button is-medium">
+            <a class="button is-medium" @click="() => this.send('NEXT')">
               <span class="icon">
                 <i class="bx bx-skip-next"></i>
               </span>
@@ -95,11 +95,17 @@
           <p class="control">
             <a
               class="button is-medium"
-              :class="{ 'is-primary': currentState.matches('repeat.once') }"
+              :class="{
+                'is-primary': !currentState.matches('repeat.noRepeat')
+              }"
               @click="() => this.send('TOGGLE_REPEAT')"
             >
               <span class="icon">
-                <i class="bx bx-repeat"></i>
+                <i
+                  v-if="!currentState.matches('repeat.all')"
+                  class="bx bx-repeat"
+                ></i>
+                <i v-else class="bx bx-infinite"></i>
               </span>
             </a>
           </p>

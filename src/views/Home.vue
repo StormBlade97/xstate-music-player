@@ -22,6 +22,13 @@ export default {
   components: {
     Bar,
     Player
+  },
+  created() {
+    document.addEventListener("keydown", event => {
+      if (event.code == "Space") {
+        this.send("TOGGLE_PLAYBACK");
+      }
+    });
   }
 };
 </script>

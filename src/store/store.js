@@ -22,6 +22,10 @@ const store = new Vuex.Store({
 
 musicPlayingService
   .onTransition(state => {
+    if (state.event.type !== "UPDATE_PROGRESS") {
+      console.log(state.event.type, ":", state.toStrings());
+      console.log("Context:", state.context);
+    }
     store.commit("updateState", state);
   })
   .start();
