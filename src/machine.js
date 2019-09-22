@@ -1,71 +1,72 @@
-import { Machine, interpret, assign } from "xstate";
+import { Machine, interpret, send, assign } from "xstate";
 
-const musicPlayer = Machine(
+export const musicPlayer = Machine(
   {
     id: "player",
     context: {
-      playbackSpeed: 1,
-      tracks: [1, 2, 3, 4, 5],
-      currentTrackIndex: 1,
-      repeatTogglePattern: ["none", "once", "all"]
+      tracks: [],
+      currentTrackIndex: 0,
+      currentTrackAudioElem: null,
+      currentProgress: 0
     },
     type: "parallel",
     states: {
       playback: {
-        initial: "stopped",
+        initial: "paused",
         states: {
+          playbackRequested: {
+            invoke: {
+              src: context => context.currentTrackAudioElem.play(),
+              onDone: {
+                target: "playing"
+              },
+              onError: {
+                target: "paused"
+              }
+            }
+          },
           playing: {
-            initial: "normal",
-            on: {
-              PAUSE: "paused",
-              STOP: "stopped",
-              PLAY: {
-                target: ".normal",
-                actions: "resetSpeed"
+            exit: "pause",
+            invoke: {
+              id: "playing",
+              src: context => callback => {
+                context.currentTrackAudioElem.onended = () => {
+                  callback({ type: "END" });
+                };
+                context.currentTrackAudioElem.ontimeupdate = ev => {
+                  callback({
+                    type: "UPDATE_PROGRESS",
+                    progress: ev.target.currentTime / ev.target.duration
+                  });
+                };
+                return () => {
+                  context.currentTrackAudioElem.onended = null;
+                  context.currentTrackAudioElem.ontimeupdate = null;
+                };
               }
             },
-            states: {
-              normal: {
-                on: {
-                  FAST_FWD: "fastfwd",
-                  BACKWARD: "backward"
-                }
+            on: {
+              PAUSE: "paused",
+              END: {
+                target: "paused",
+                actions: ["resetPos"]
               },
-              fastfwd: {
-                on: {
-                  FAST_FWD: {
-                    internal: false,
-                    actions: "changePlaybackSpeed",
-                    cond: "canScalePlaybackSpeed"
-                  },
-                  BACKWARD: {
-                    target: "backward"
-                  }
-                }
+              SELECT_TRACK: {
+                target: "playbackRequested",
+                actions: "updateCurrentTrack"
               },
-              backward: {
-                on: {
-                  BACKWARD: {
-                    internal: false,
-                    actions: "changePlaybackSpeed",
-                    cond: { type: "canScalePlaybackSpeed" }
-                  },
-                  FAST_FWD: {
-                    target: "fastfwd"
-                  }
-                }
+              UPDATE_PROGRESS: {
+                actions: "updateProgress"
               }
             }
           },
           paused: {
             on: {
-              PLAY: "playing",
-              STOP: "stopped"
-            }
-          },
-          stopped: {
-            on: {
-              PLAY: "playing"
+              PLAY: { target: "playbackRequested", cond: "canPlay" },
+              SELECT_TRACK: {
+                target: "playbackRequested",
+                actions: "updateCurrentTrack"
+              }
             }
           }
         }
@@ -75,12 +76,19 @@ const musicPlayer = Machine(
         states: {
           noRepeat: {
             on: {
-              TOGGLE_REPEAT: "once"
+              TOGGLE_REPEAT: {
+                target: "once",
+                actions: "enableLoop",
+                cond: "canPlay"
+              }
             }
           },
           once: {
             on: {
-              TOGGLE_REPEAT: "noRepeat"
+              TOGGLE_REPEAT: {
+                target: "noRepeat",
+                actions: "disableLoop"
+              }
             }
           }
         }
@@ -99,28 +107,95 @@ const musicPlayer = Machine(
             }
           }
         }
+      },
+      upload: {
+        initial: "idle",
+        states: {
+          idle: {
+            on: {
+              UPLOAD_TRACK: "inserting"
+            }
+          },
+          inserting: {
+            invoke: {
+              id: "loadMoreTrack",
+              src: "loadSongService",
+              onDone: {
+                target: "idle",
+                actions: [
+                  "updateTracks",
+                  send({
+                    type: "SELECT_TRACK",
+                    index: 0
+                  })
+                ]
+              },
+              onError: {
+                target: "idle"
+              }
+            }
+          }
+        }
       }
     }
   },
   {
     actions: {
-      changePlaybackSpeed: assign({
-        playbackSpeed: context => {
-          return context.playbackSpeed < 1
-            ? 1
-            : (context.playbackSpeed += 0.25);
+      updateProgress: assign({
+        currentProgress: (context, event) => event.progress
+      }),
+      enableLoop: context => (context.currentTrackAudioElem.loop = true),
+      disableLoop: context => (context.currentTrackAudioElem.loop = false),
+      resetPos: context => {
+        context.currentTrackAudioElem.currentTime = 0;
+      },
+      pause: context => {
+        context.currentTrackAudioElem.pause();
+      },
+      updateTracks: assign({
+        tracks: (context, event) => {
+          return context.tracks.concat(event.data);
         }
       }),
-      resetSpeed: assign({ playbackSpeed: () => 1 })
+      updateCurrentTrack: assign({
+        currentTrackIndex: (context, event) => event.index,
+        currentTrackAudioElem: (context, event) => {
+          const { audioElement } = context.tracks[event.index];
+          return audioElement;
+        }
+      })
     },
     guards: {
-      canScalePlaybackSpeed: context => {
-        return !(context.playbackSpeed >= 2 || context.playbackSpeed <= 0.25);
+      canPlay: context => {
+        const result =
+          context.currentTrackAudioElem &&
+          context.currentTrackAudioElem.readyState === 4;
+        return result;
       }
+    },
+    services: {
+      loadSongService: (context, event) =>
+        new Promise((resolve, reject) => {
+          try {
+            let tracks = [];
+            const files = event.files;
+            for (let i = 0; i < files.length; i++) {
+              const file = files.item(i);
+              const url = URL.createObjectURL(file);
+
+              const newAudioElem = new Audio(url);
+              tracks.push({
+                name: file.name,
+                src: url,
+                audioElement: newAudioElem
+              });
+            }
+            resolve(tracks);
+          } catch (error) {
+            reject(error);
+          }
+        })
     }
   }
 );
-
-const musicPlayingService = interpret(musicPlayer);
-
-export { musicPlayer, musicPlayingService };
+export const musicPlayingService = interpret(musicPlayer);

@@ -4,8 +4,10 @@
       <div class="container">
         <Bar></Bar>
       </div>
+    </section>
+    <section class="section">
       <div class="container">
-        <!-- <Audio></Audio> -->
+        <Player></Player>
       </div>
     </section>
   </div>
@@ -13,11 +15,13 @@
 
 <script>
 import Bar from "@/components/Bar.vue";
+import Player from "@/components/Player.vue";
 
 export default {
   name: "home",
   components: {
-    Bar
+    Bar,
+    Player
   }
 };
 </script>

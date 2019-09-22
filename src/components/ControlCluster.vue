@@ -5,9 +5,12 @@
         <div class="field has-addons">
           <p class="control">
             <a
-              class="button is-medium"
+              class="button is-medium is-rounded"
               :class="{
-                'is-primary': this.currentState.matches('playback.playing')
+                'is-primary': this.currentState.matches('playback.playing'),
+                'is-warning': this.currentState.matches(
+                  'playback.playbackRequested'
+                )
               }"
               @click="() => this.send('PLAY')"
             >
@@ -26,19 +29,6 @@
             >
               <span class="icon">
                 <i class="bx bx-pause"></i>
-              </span>
-            </a>
-          </p>
-          <p class="control">
-            <a
-              class="button is-medium"
-              :class="{
-                'is-primary': this.currentState.matches('playback.stopped')
-              }"
-              @click="() => this.send('STOP')"
-            >
-              <span class="icon">
-                <i class="bx bx-stop"></i>
               </span>
             </a>
           </p>
@@ -69,7 +59,7 @@
           </p>
           <p class="control">
             <a
-              class="button is-medium"
+              class="button is-medium is-relative"
               :class="{
                 'is-primary': currentState.matches('playback.playing.fastfwd')
               }"
@@ -125,8 +115,20 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+@import "~bulma/sass/utilities/initial-variables.sass";
 .bar-container {
   display: flex;
   align-items: center;
+}
+@keyframes pulse {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.checking {
+  border: 1px $red solid !important;
 }
 </style>
