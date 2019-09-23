@@ -1,9 +1,6 @@
 import { Machine, interpret, send, assign } from "xstate";
-function getRandomInt(min, max) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+import { getRandomInt, mapIndex } from "@/util.js";
+
 export const musicPlayer = Machine(
   {
     id: "player",
@@ -67,6 +64,12 @@ export const musicPlayer = Machine(
               },
               UPDATE_PROGRESS: {
                 actions: "updateProgress"
+              },
+              SKIP_TO: {
+                actions: "goToTime"
+              },
+              SKIP_10: {
+                actions: "skip10"
               }
             }
           },
@@ -81,6 +84,9 @@ export const musicPlayer = Machine(
               SELECT_DEFAULT_TRACK: {
                 target: "playbackRequested",
                 actions: "selectTrack"
+              },
+              SKIP_TO: {
+                actions: "goToTime"
               }
             }
           }
@@ -94,6 +100,32 @@ export const musicPlayer = Machine(
               TOGGLE_REPEAT: {
                 target: "once",
                 cond: "canPlay"
+              },
+              NEXT: {
+                cond: "hasNextTrack",
+                actions: [
+                  send(context => ({
+                    type: "SELECT_TRACK",
+                    index: context.nextTrackIndex
+                  })),
+                  assign({
+                    nextTrackIndex: context => context.currentTrackIndex + 1,
+                    prevTrackIndex: context => context.currentTrackIndex - 1
+                  })
+                ]
+              },
+              PREV: {
+                cond: "hasPrevTrack",
+                actions: [
+                  send(context => ({
+                    type: "SELECT_TRACK",
+                    index: context.prevTrackIndex
+                  })),
+                  assign({
+                    nextTrackIndex: context => context.currentTrackIndex + 1,
+                    prevTrackIndex: context => context.currentTrackIndex - 1
+                  })
+                ]
               }
             }
           },
@@ -184,8 +216,8 @@ export const musicPlayer = Machine(
           on: {
             on: {
               TOGGLE_SHUFFLE: {
-                target: "off"
-                // actions: "remapIndexes"
+                target: "off",
+                actions: "remapIndexes"
               }
             }
           },
@@ -193,7 +225,7 @@ export const musicPlayer = Machine(
             on: {
               TOGGLE_SHUFFLE: {
                 target: "on",
-                actions: ["genRandomTrackOrder"],
+                actions: ["genRandomTrackOrder", "mapIndexes"],
                 cond: "hasMultipleTrack"
               }
             }
@@ -227,7 +259,6 @@ export const musicPlayer = Machine(
   },
   {
     actions: {
-      curse: () => console.log("FUCK!"),
       updateProgress: assign({
         currentProgress: (context, event) => event.progress
       }),
@@ -238,6 +269,26 @@ export const musicPlayer = Machine(
       },
       pause: context => {
         context.currentTrackAudioElem.pause();
+      },
+      goToTime: (context, event) => {
+        context.currentTrackAudioElem.currentTime = Math.max(
+          Math.min(event.time, context.currentTrackAudioElem.duration),
+          0
+        );
+      },
+      skip10: (context, event) => {
+        const { currentTrackAudioElem } = context;
+        const { duration, currentTime } = currentTrackAudioElem;
+        let time = 0;
+        if (event.forward) {
+          time = currentTime + 10;
+        } else {
+          time = currentTime - 10;
+        }
+        currentTrackAudioElem.currentTime = Math.max(
+          Math.min(time, duration),
+          0
+        );
       },
       updateTracks: assign({
         tracks: (context, event) => {
@@ -258,7 +309,9 @@ export const musicPlayer = Machine(
             context.currentTrackAudioElem.pause();
             context.currentTrackAudioElem.currentTime = 0;
           }
-          const { audioElement } = context.tracks[event.index || 0];
+          const { audioElement } = context.tracks[
+            mapIndex(event.index || 0, context.trackOrder)
+          ];
           return audioElement;
         }
       }),
@@ -280,16 +333,17 @@ export const musicPlayer = Machine(
           return order;
         }
       }),
-      remapIndexes: assign({
-        currentTrackIndex: context => {
-          const answer = context.trackOrder.indexOf(context.currentTrackIndex);
-          return answer;
-        },
+      mapIndexes: assign({
+        currentTrackIndex: context =>
+          mapIndex(context.currentTrackIndex, context.trackOrder),
         prevTrackIndex: context => {
-          return context.trackOrder.indexOf[context.prevTrackIndex];
+          return mapIndex(context.prevTrackIndex, context.trackOrder);
+        },
+        nextTrackIndex: context => {
+          return mapIndex(context.nextTrackIndex, context.trackOrder);
         }
       }),
-      mapIndexes: assign({
+      remapIndexes: assign({
         currentTrackIndex: context => {
           return context.trackOrder[context.currentTrackIndex];
         },
@@ -298,6 +352,9 @@ export const musicPlayer = Machine(
         },
         nextTrackIndex: context => {
           return context.trackOrder[context.nextTrackIndex];
+        },
+        trackOrder: context => {
+          return context.tracks.map((_, index) => index);
         }
       })
     },
@@ -313,6 +370,12 @@ export const musicPlayer = Machine(
       },
       hasSingleTrack: context => {
         return context.tracks.length < 2;
+      },
+      hasNextTrack: context => {
+        return context.currentTrackIndex + 1 < context.tracks.length;
+      },
+      hasPrevTrack: context => {
+        return context.currentTrackIndex > 0;
       }
     },
     services: {

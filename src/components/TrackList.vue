@@ -34,6 +34,7 @@
 </template>
 <script>
 import UploadButton from "@/components/UploadButton.vue";
+import { mapArray } from "@/util.js";
 
 export default {
   name: "TrackList",
@@ -42,27 +43,20 @@ export default {
   },
   methods: {
     selectTrack(index) {
-      const mappedIndex = this.currentState.matches("shuffle.on")
-        ? this.currentState.context.trackOrder.indexOf(index)
-        : index;
       this.send({
         type: "SELECT_TRACK",
-        index: mappedIndex
+        index: index
       });
     }
   },
   computed: {
     trackList() {
       const { tracks, trackOrder } = this.currentState.context;
-      if (this.currentState.matches("shuffle.on")) {
-        return trackOrder.map(index => tracks[index].name);
-      } else {
-        return tracks.map(f => f.name);
-      }
+      return mapArray(tracks, trackOrder).map(f => f.name);
     },
     activeTrack() {
-      const { tracks, currentTrackIndex } = this.currentState.context;
-      return tracks[currentTrackIndex].name;
+      const { currentTrackIndex } = this.currentState.context;
+      return this.trackList[currentTrackIndex];
     }
   }
 };

@@ -50,7 +50,7 @@
               :class="{
                 'is-primary': currentState.matches('playback.playing.backward')
               }"
-              @click="() => this.send('BACKWARD')"
+              @click="() => this.send({ type: 'SKIP_10' })"
             >
               <span class="icon">
                 <i class="bx bx-rewind"></i>
@@ -63,7 +63,7 @@
               :class="{
                 'is-primary': currentState.matches('playback.playing.fastfwd')
               }"
-              @click="() => this.send('FAST_FWD')"
+              @click="() => this.send({ type: 'SKIP_10', forward: true })"
             >
               <span class="icon">
                 <i class="bx bx-fast-forward"></i>
