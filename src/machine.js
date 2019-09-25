@@ -1,5 +1,7 @@
 import { Machine, interpret, send, assign } from "xstate";
 import { getRandomInt, mapIndex } from "@/util.js";
+import axios from "axios";
+window.axios = axios;
 
 export const musicPlayer = Machine(
   {
@@ -83,7 +85,8 @@ export const musicPlayer = Machine(
               },
               SELECT_DEFAULT_TRACK: {
                 target: "playbackRequested",
-                actions: "selectTrack"
+                actions: "selectTrack",
+                cond: "noSelectedTrack"
               },
               SKIP_TO: {
                 actions: "goToTime"
@@ -296,8 +299,8 @@ export const musicPlayer = Machine(
         },
         trackOrder: (context, event) => {
           const clone = [...context.trackOrder];
-          for (let i = context.trackOrder.length; i < event.data.length; i++) {
-            clone.push(i);
+          for (let i = 0; i < event.data.length; i++) {
+            clone.push(context.trackOrder.length + i);
           }
           return clone;
         }
@@ -376,28 +379,53 @@ export const musicPlayer = Machine(
       },
       hasPrevTrack: context => {
         return context.currentTrackIndex > 0;
+      },
+      noSelectedTrack: context => {
+        return !context.currentTrackAudioElem;
       }
     },
     services: {
       loadSongService: (context, event) =>
-        new Promise((resolve, reject) => {
+        new Promise(async (resolve, reject) => {
           try {
             let tracks = [];
             const files = event.files;
             for (let i = 0; i < files.length; i++) {
               const file = files.item(i);
-              if (context.tracks.find(track => track.name === file.name)) {
+              if (context.tracks.find(track => track.filename === file.name)) {
                 continue;
               }
               const url = URL.createObjectURL(file);
 
               const newAudioElem = new Audio(url);
               tracks.push({
-                name: file.name,
+                filename: file.name,
                 src: url,
                 audioElement: newAudioElem
               });
             }
+
+            await Promise.all(
+              tracks.map((track, index) =>
+                axios
+                  .get(
+                    `/album-arts?q=${encodeURIComponent(
+                      track.filename
+                        .split(".")[0]
+                        .split("-")[0]
+                        .replace(/_/g, "")
+                    )}`
+                  )
+                  .then(r => r.data)
+                  .then(data => {
+                    tracks[index] = {
+                      ...tracks[index],
+                      ...data
+                    };
+                  })
+                  .catch(console.error)
+              )
+            );
             resolve(tracks);
           } catch (error) {
             reject(error);

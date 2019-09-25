@@ -52,7 +52,7 @@ export default {
   computed: {
     trackList() {
       const { tracks, trackOrder } = this.currentState.context;
-      return mapArray(tracks, trackOrder).map(f => f.name);
+      return mapArray(tracks, trackOrder).map(f => f.name || f.filename);
     },
     activeTrack() {
       const { currentTrackIndex } = this.currentState.context;

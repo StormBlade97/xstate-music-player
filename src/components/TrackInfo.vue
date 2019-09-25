@@ -1,5 +1,8 @@
 <template>
-  <div class="box is-shadowless has-background-grey-light track-art">
+  <div
+    class="box is-shadowless has-background-grey-light track-art"
+    :style="{ 'background-image': `url(${imgSrc})` }"
+  >
     <div class="progressPositioner">
       <progress
         class="progressBar progress is-primary"
@@ -16,6 +19,15 @@ export default {
   computed: {
     currentProgress() {
       return this.currentState.context.currentProgress * 100;
+    },
+    imgSrc() {
+      const {
+        trackOrder,
+        tracks,
+        currentTrackIndex
+      } = this.currentState.context;
+      const result = tracks[trackOrder[currentTrackIndex]].images[0].url;
+      return result;
     }
   },
   methods: {
@@ -44,5 +56,6 @@ export default {
   width: 400px;
   height: 400px;
   position: relative;
+  background-size: cover;
 }
 </style>
