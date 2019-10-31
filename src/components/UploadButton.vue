@@ -1,5 +1,5 @@
 <template>
-  <div class="file is-primary">
+  <div class="file is-medium">
     <label class="file-label">
       <input
         type="file"
@@ -9,10 +9,10 @@
         @change="updateTrack"
       />
       <div class="file-cta">
-        <span class="has-text-weight-bold file-label">Upload</span>
-        <span class="file-icon icon is-size-5 is-marginless">
+        <span class="file-icon icon is-size-4">
           <i class="bx bx-plus"></i>
         </span>
+        <span class="file-label has-text-weight-semibold">Add tracks</span>
       </div>
     </label>
   </div>
@@ -24,7 +24,9 @@ export default {
     updateTrack(event) {
       this.send({
         type: "UPLOAD_TRACK",
-        files: event.target.files
+        payload: {
+          files: event.target.files
+        }
       });
     }
   }

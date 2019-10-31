@@ -1,16 +1,16 @@
 import Vuex from "vuex";
 import Vue from "vue";
-import { musicPlayingService } from "@/machine.js";
+import musicPlayerService from "@/machineReplacement.js";
 
 Vue.use(Vuex);
 
 const store = new Vuex.Store({
   state: {
-    currentState: musicPlayingService.initialState
+    currentState: musicPlayerService.initialState
   },
   actions: {
     sendEvent(ctx, event) {
-      musicPlayingService.send(event);
+      musicPlayerService.send(event);
     }
   },
   mutations: {
@@ -20,12 +20,10 @@ const store = new Vuex.Store({
   }
 });
 
-musicPlayingService
-  .onTransition(state => {
-    if (state.event.type !== "UPDATE_PROGRESS") {
-      console.log(state.event.type, ":", state.toStrings());
-      console.log("Context:", state.context);
-    }
+musicPlayerService
+  .onTransition((state, event) => {
+    console.log(state);
+    console.log(event);
     store.commit("updateState", state);
   })
   .start();

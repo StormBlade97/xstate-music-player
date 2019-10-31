@@ -16,6 +16,7 @@
     "dotenv": "^8.1.0",
     "howler": "^2.1.2",
     "http-proxy-middleware": "^0.20.0",
+    "music-metadata-browser": "^1.6.1",
     "qs": "^6.9.0",
     "spotify-web-api-js": "^1.2.0",
     "spotify-web-api-node": "^4.0.0",

@@ -1,130 +1,117 @@
 <template>
-  <div class="bar-container box is-shadowless">
-    <div class="field is-grouped is-grouped-multiline">
-      <div class="control">
-        <div class="field has-addons">
-          <p class="control">
-            <a
-              class="button is-medium is-rounded"
-              :class="{
-                'is-primary': this.currentState.matches('playback.playing'),
-                'is-warning': this.currentState.matches(
-                  'playback.playbackRequested'
-                )
-              }"
-              @click="() => this.send('PLAY')"
-            >
-              <span class="icon">
-                <i class="bx bx-play"></i>
-              </span>
-            </a>
-          </p>
-          <p class="control">
-            <a
-              class="button is-medium"
-              :class="{
-                'is-primary': this.currentState.matches('playback.paused')
-              }"
-              @click="() => this.send('PAUSE')"
-            >
-              <span class="icon">
-                <i class="bx bx-pause"></i>
-              </span>
-            </a>
-          </p>
-        </div>
-      </div>
+  <div class="bar-container level box is-shadowless">
+    <div class="level-item">
+      <div class="buttons">
+        <button
+          class="button is-borderless is-rounded is-white"
+          @click="() => this.send('PREV')"
+        >
+          <span class="icon is-large">
+            <i class="bx bx-skip-previous bx-sm"></i>
+          </span>
+        </button>
+        <button
+          v-if="this.currentState.matches('playback.playing')"
+          class="button is-medium is-borderless is-rounded is-white is-primary"
+          @click="() => this.send('PLAY')"
+        >
+          <span class="icon is-size-5">
+            <i class="bx bx-play bx-md"></i>
+          </span>
+        </button>
+        <button
+          class="button is-medium is-borderless is-rounded is-white is-primary"
+          v-else
+          @click="() => this.send('PAUSE')"
+        >
+          <span class="icon is-size-5">
+            <i class="bx bx-pause bx-md"></i>
+          </span>
+        </button>
 
-      <div class="control">
-        <div class="field has-addons">
-          <p class="control">
-            <a class="button is-medium" @click="() => this.send('PREV')">
-              <span class="icon">
-                <i class="bx bx-skip-previous"></i>
-              </span>
-            </a>
-          </p>
-          <p class="control">
-            <a
-              class="button is-medium"
-              :class="{
-                'is-primary': currentState.matches('playback.playing.backward')
-              }"
-              @click="() => this.send({ type: 'SKIP_10' })"
-            >
-              <span class="icon">
-                <i class="bx bx-rewind"></i>
-              </span>
-            </a>
-          </p>
-          <p class="control">
-            <a
-              class="button is-medium is-relative"
-              :class="{
-                'is-primary': currentState.matches('playback.playing.fastfwd')
-              }"
-              @click="() => this.send({ type: 'SKIP_10', forward: true })"
-            >
-              <span class="icon">
-                <i class="bx bx-fast-forward"></i>
-              </span>
-            </a>
-          </p>
-          <p class="control">
-            <a class="button is-medium" @click="() => this.send('NEXT')">
-              <span class="icon">
-                <i class="bx bx-skip-next"></i>
-              </span>
-            </a>
-          </p>
-        </div>
+        <button
+          class="button is-borderless is-white is-rounded"
+          @click="() => this.send('NEXT')"
+        >
+          <span class="icon">
+            <i class="bx bx-skip-next bx-sm"></i>
+          </span>
+        </button>
       </div>
-      <div class="control">
-        <div class="field has-addons">
-          <p class="control">
-            <a
-              class="button is-medium"
-              :class="{ 'is-primary': currentState.matches('shuffle.on') }"
-              @click="() => this.send('TOGGLE_SHUFFLE')"
-            >
-              <span class="icon">
-                <i class="bx bx-shuffle"></i>
-              </span>
-            </a>
-          </p>
-          <p class="control">
-            <a
-              class="button is-medium"
-              :class="{
-                'is-primary': !currentState.matches('repeat.noRepeat')
-              }"
-              @click="() => this.send('TOGGLE_REPEAT')"
-            >
-              <span class="icon">
-                <i
-                  v-if="!currentState.matches('repeat.all')"
-                  class="bx bx-repeat"
-                ></i>
-                <i v-else class="bx bx-infinite"></i>
-              </span>
-            </a>
-          </p>
-        </div>
+    </div>
+    <div class="level-item grow-2">
+      <Seeker></Seeker>
+    </div>
+    <div class="level-item">
+      <div class="buttons">
+        <button
+          class="button is-borderless is-rounded is-white"
+          :class="{
+            'is-primary': currentState.matches('playback.playing.backward')
+          }"
+          @click="() => this.send({ type: 'SKIP_10' })"
+        >
+          <span class="icon">
+            <i class="bx bx-rewind bx-sm"></i>
+          </span>
+        </button>
+        <button
+          class="button is-borderless is-rounded is-white is-relative"
+          :class="{
+            'is-primary': currentState.matches('playback.playing.fastfwd')
+          }"
+          @click="() => this.send({ type: 'SKIP_10', forward: true })"
+        >
+          <span class="icon">
+            <i class="bx bx-fast-forward bx-sm"></i>
+          </span>
+        </button>
+      </div>
+    </div>
+    <div class="level-item">
+      <div class="buttons">
+        <button
+          class="button is-borderless is-rounded is-white"
+          :class="{ 'is-primary': currentState.matches('shuffle.on') }"
+          @click="() => this.send('TOGGLE_SHUFFLE')"
+        >
+          <span class="icon">
+            <i class="bx bx-shuffle bx-sm"></i>
+          </span>
+        </button>
+        <button
+          class="button is-borderless is-rounded is-white"
+          :class="{
+            'is-primary': !currentState.matches('repeat.noRepeat')
+          }"
+          @click="() => this.send('TOGGLE_REPEAT')"
+        >
+          <span class="icon">
+            <i
+              v-if="!currentState.matches('repeat.all')"
+              class="bx bx-repeat bx-sm"
+            ></i>
+            <i v-else class="bx bx-infinite bx-sm"></i>
+          </span>
+        </button>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
+import Seeker from "@/components/Seeker.vue";
 export default {
-  name: "ControlCluster"
+  name: "ControlCluster",
+  components: {
+    Seeker
+  }
 };
 </script>
 <style lang="scss" scoped>
 @import "~bulma/sass/utilities/initial-variables.sass";
-.bar-container {
-  display: flex;
-  align-items: center;
+.is-borderless {
+  border-color: transparent;
 }
 @keyframes pulse {
   from {
@@ -136,5 +123,10 @@ export default {
 }
 .checking {
   border: 1px $red solid !important;
+}
+.grow-2 {
+  flex-grow: 2;
+  flex-shrink: 1;
+  flex-basis: 50%;
 }
 </style>

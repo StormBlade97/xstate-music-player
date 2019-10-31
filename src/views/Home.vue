@@ -1,34 +1,14 @@
 <template>
-  <div id="app">
-    <section class="section">
-      <div class="container">
-        <Bar></Bar>
-      </div>
-    </section>
-    <section class="section">
-      <div class="container">
-        <Player></Player>
-      </div>
-    </section>
-  </div>
+  <Main />
 </template>
 
 <script>
-import Bar from "@/components/Bar.vue";
-import Player from "@/components/Player.vue";
+import Main from "@/components/MainSection";
 
 export default {
   name: "home",
   components: {
-    Bar,
-    Player
-  },
-  created() {
-    document.addEventListener("keydown", event => {
-      if (event.code == "Space") {
-        this.send("TOGGLE_PLAYBACK");
-      }
-    });
+    Main
   }
 };
 </script>

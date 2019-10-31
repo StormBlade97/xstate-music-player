@@ -1,2 +1,11 @@
 $primary: #fa016d;
+$file-radius: 1rem;
+$radius-medium: 1rem;
 @import "../node_modules/bulma/bulma.sass";
+
+html,
+body,
+#app {
+  width: 100%;
+  height: 100%;
+}
