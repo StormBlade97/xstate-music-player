@@ -1,7 +1,9 @@
 <template>
   <div class="seeker-root">
     <span class="time-mark">00:00</span>
-    <progress class="progress seeker-progress is-primary"></progress>
+    <progress
+      class="progress seeker-progress is-primary is-marginless"
+    ></progress>
     <span class="time-mark">4:00</span>
   </div>
 </template>
@@ -24,7 +26,6 @@ export default {};
 }
 .seeker-progress {
   height: 4px !important;
-  margin: 0;
 }
 .time-mark {
   margin: 0 1rem;

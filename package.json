@@ -26,6 +26,7 @@
     "xstate": "^4.6.7"
   },
   "devDependencies": {
+    "@testing-library/vue": "^4.1.0",
     "@vue/cli-plugin-babel": "^3.11.0",
     "@vue/cli-plugin-eslint": "^3.11.0",
     "@vue/cli-plugin-unit-jest": "^3.11.0",
@@ -42,6 +43,7 @@
     "prettier": "^1.18.2",
     "sass": "^1.18.0",
     "sass-loader": "^7.1.0",
+    "typescript": "^3.6.4",
     "vue-template-compiler": "^2.6.10"
   },
   "gitHooks": {

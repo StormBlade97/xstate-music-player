@@ -202,7 +202,7 @@ const actionsAndServices = {
     }
   }
 };
-const machine = Machine(statechartsDef, actionsAndServices);
+export const machine = Machine(statechartsDef, actionsAndServices);
 
 const musicPlayerService = interpret(machine);
 export default musicPlayerService;

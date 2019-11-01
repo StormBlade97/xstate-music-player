@@ -14,7 +14,7 @@
         data-test="empty-intro-page"
         v-if="this.currentState.matches('empty')"
       ></EmptyIntroPage>
-      <div class="control-bar" data-test="control-bar">
+      <div class="control-bar">
         <ControlCluster></ControlCluster>
       </div>
     </div>
@@ -47,6 +47,7 @@ export default {
 };
 </script>
 <style lang="scss">
+@import "@/main.scss";
 .root {
   overflow: hidden;
   position: relative;
@@ -64,7 +65,7 @@ export default {
 .sideBar {
   width: 30rem;
   height: 100%;
-  background-color: rgb(228, 228, 228);
+  background-color: $bg-sidebar;
 }
 .banner {
   position: absolute;

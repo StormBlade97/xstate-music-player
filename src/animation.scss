@@ -1,0 +1,15 @@
+@keyframes marquee {
+  15% {
+    transform: translate(0);
+  }
+  100% {
+    transform: translate(-120%, 0);
+  }
+}
+.animation-on-hover {
+  &:hover {
+    .marquee {
+      animation: marquee 3s ease-in infinite;
+    }
+  }
+}

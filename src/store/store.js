@@ -21,9 +21,7 @@ const store = new Vuex.Store({
 });
 
 musicPlayerService
-  .onTransition((state, event) => {
-    console.log(state);
-    console.log(event);
+  .onTransition(state => {
     store.commit("updateState", state);
   })
   .start();
