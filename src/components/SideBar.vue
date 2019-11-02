@@ -19,7 +19,7 @@
           <p>There is nothing right now. Add some tracks to enjoy the music!</p>
         </div>
 
-        <UploadButton></UploadButton>
+        <UploadButton @loadFile="uploadFile"></UploadButton>
       </div>
     </div>
   </div>
@@ -32,6 +32,16 @@ export default {
   components: {
     TrackList,
     UploadButton
+  },
+  methods: {
+    uploadFile(fileArray) {
+      this.send({
+        type: "UPLOAD_TRACK",
+        payload: {
+          fileArray
+        }
+      });
+    }
   }
 };
 </script>

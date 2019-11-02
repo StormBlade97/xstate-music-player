@@ -18,16 +18,12 @@
   </div>
 </template>
 <script>
+import { mapFileListToArray } from "@/util";
 export default {
   name: "UploadButton",
   methods: {
     updateTrack(event) {
-      this.send({
-        type: "UPLOAD_TRACK",
-        payload: {
-          files: event.target.files
-        }
-      });
+      this.$emit("loadFile", mapFileListToArray(event.target.files));
     }
   }
 };

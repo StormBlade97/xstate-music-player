@@ -2,6 +2,7 @@
   <div>
     <div class="scroll-box outer">
       <div
+        data-test="track-item"
         class="track-item level is-marginless animation-on-hover is-clipped anchor fade-left"
         :class="[
           item === activeTrack && 'has-text-primary has-text-weight-medium'

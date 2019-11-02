@@ -1,0 +1,48 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`load and extract audio data actions child process to load and enrich tracks 1`] = `
+Array [
+  Array [
+    Object {
+      "payload": Object {
+        "albumArt": "",
+        "artist": undefined,
+        "audioElem": <audio
+          preload="auto"
+        />,
+        "duration": "0:00",
+        "id": "the-file-name",
+        "metadata": Object {
+          "common": Object {
+            "disk": Object {
+              "no": null,
+              "of": null,
+            },
+            "track": Object {
+              "no": null,
+              "of": null,
+            },
+          },
+          "format": Object {
+            "lossless": false,
+            "tagTypes": Array [],
+          },
+          "native": undefined,
+          "quality": Object {
+            "warnings": Array [],
+          },
+        },
+        "src": undefined,
+        "title": undefined,
+      },
+      "type": "CHILD_UPDATE",
+    },
+  ],
+  Array [
+    Object {
+      "id": "the-file-name",
+      "type": "LOAD_TRACK_SUCCESS",
+    },
+  ],
+]
+`;

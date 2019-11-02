@@ -1,5 +1,4 @@
 import { Machine, interpret, assign, spawn } from "xstate";
-import { mapFileListToArray } from "./util";
 import loadNewTrackService from "./services/audio";
 
 const statechartsDef = {
@@ -151,12 +150,11 @@ const statechartsDef = {
   }
 };
 
-const actionsAndServices = {
+export const actionsAndServices = {
   actions: {
     loadNewTrack: assign({
       tracks: (context, event) => {
-        const { files } = event.payload;
-        const fileArray = mapFileListToArray(files);
+        const { fileArray } = event.payload;
         const newTracks = fileArray.map(fileRef => {
           const id = fileRef.name;
           return {
@@ -164,11 +162,13 @@ const actionsAndServices = {
             id
           };
         });
+        console.error("Initial update process");
         return context.tracks.concat(newTracks);
       }
     }),
     updateTrackInfo: assign({
       tracks: (context, event) => {
+        console.error("Track update");
         const { payload } = event;
         const foundIndex = context.tracks.findIndex(
           elem => elem.id === payload.id
@@ -187,6 +187,7 @@ const actionsAndServices = {
       }
     }),
     uploadFinalization: (context, event) => {
+      console.error("This run!");
       const { id } = event.payload;
       const target = context.tracks.find(elem => elem.id === id);
       if (target) {

@@ -28,6 +28,7 @@ const loadNewTrackService = (blob, id) => async cb => {
   const src = URL.createObjectURL(blob);
   const audioElem = new Audio(src);
   const metadata = await musicMetadata.parseBlob(blob);
+
   cb({
     type: "CHILD_UPDATE",
     payload: {

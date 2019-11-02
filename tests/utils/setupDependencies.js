@@ -8,6 +8,7 @@ let intepreter = interpret(machine);
 export function setup(VueInstance) {
   VueInstance.use(Vuex);
   VueInstance.use(machineMixin);
+
   const store = new Vuex.Store({
     state: {
       currentState: intepreter.initialState
