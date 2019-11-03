@@ -1,6 +1,6 @@
 <template>
-  <div class="file is-medium">
-    <label class="file-label">
+  <div class="file is-primary is-medium is-fullwidth">
+    <label class="file-label is-fullwidth">
       <input
         type="file"
         accept="audio/*"
@@ -8,7 +8,7 @@
         class="file-input"
         @change="updateTrack"
       />
-      <div class="file-cta">
+      <div class="file-cta is-fullwidth">
         <span class="file-icon icon is-size-4">
           <i class="bx bx-plus"></i>
         </span>
@@ -28,3 +28,8 @@ export default {
   }
 };
 </script>
+<style lang="scss">
+.is-fullwidth {
+  width: 100% !important;
+}
+</style>

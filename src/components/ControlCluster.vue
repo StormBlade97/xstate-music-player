@@ -1,5 +1,5 @@
 <template>
-  <div class="bar-container level box is-shadowless">
+  <div class="level box is-shadowless is-radiusless">
     <div class="level-item">
       <div class="buttons">
         <button
@@ -11,7 +11,7 @@
           </span>
         </button>
         <button
-          v-if="this.currentState.matches('ready.playback.playing')"
+          v-if="this.currentState.matches('main.ready.playback.playing')"
           class="button is-medium is-borderless is-rounded is-white is-primary"
           @click="() => this.send('PAUSE')"
         >
@@ -46,10 +46,9 @@
       <div class="buttons">
         <button
           class="button is-borderless is-rounded is-white"
-          :class="{
-            'is-primary': currentState.matches('playback.playing.backward')
-          }"
-          @click="() => this.send({ type: 'SKIP_10' })"
+          @click="
+            () => this.send({ type: 'SKIP_TEN', payload: { forward: false } })
+          "
         >
           <span class="icon">
             <i class="bx bx-rewind bx-sm"></i>
@@ -60,7 +59,9 @@
           :class="{
             'is-primary': currentState.matches('playback.playing.fastfwd')
           }"
-          @click="() => this.send({ type: 'SKIP_10', forward: true })"
+          @click="
+            () => this.send({ type: 'SKIP_TEN', payload: { forward: true } })
+          "
         >
           <span class="icon">
             <i class="bx bx-fast-forward bx-sm"></i>
@@ -73,7 +74,9 @@
         <button
           class="button is-borderless is-rounded is-white"
           :class="{
-            'has-text-primary': currentState.matches('ready.shuffle.enabled')
+            'has-text-primary': currentState.matches(
+              'main.ready.shuffle.enabled'
+            )
           }"
           @click="() => this.send('TOGGLE_SHUFFLE')"
         >
@@ -85,14 +88,14 @@
           class="button is-borderless is-rounded is-white"
           :class="{
             'has-text-primary':
-              currentState.matches('ready.repeat.once') ||
-              currentState.matches('ready.repeat.all')
+              currentState.matches('main.ready.repeat.once') ||
+              currentState.matches('main.ready.repeat.all')
           }"
           @click="() => this.send('TOGGLE_REPEAT')"
         >
           <span class="icon">
             <i
-              v-if="!currentState.matches('ready.repeat.all')"
+              v-if="!currentState.matches('main.ready.repeat.all')"
               class="bx bx-repeat bx-sm"
             ></i>
             <i v-else class="bx bx-infinite bx-sm"></i>

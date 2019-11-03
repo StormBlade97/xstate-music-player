@@ -6,15 +6,21 @@
     <div class="main is-clipped">
       <div class="banner">
         <div
-          class="banner-img"
+          class="banner-img anchor"
           :style="{ backgroundImage: `url('${bannerUrl}')` }"
         ></div>
       </div>
-      <EmptyIntroPage
-        data-test="empty-intro-page"
-        v-if="this.currentState.matches('empty')"
-      ></EmptyIntroPage>
-      <div class="control-bar" v-if="this.currentState.matches('ready')">
+      <div class="section">
+        <div class="container">
+          <EmptyIntroPage
+            data-test="empty-intro-page"
+            v-if="this.currentState.matches('main.empty')"
+          ></EmptyIntroPage>
+          <TrackInfo v-else />
+        </div>
+      </div>
+
+      <div class="control-bar" v-if="this.currentState.matches('main.ready')">
         <ControlCluster></ControlCluster>
       </div>
     </div>
@@ -25,16 +31,27 @@
 import SideBar from "./SideBar";
 import EmptyIntroPage from "./EmptyIntroPage";
 import ControlCluster from "./ControlCluster";
+import TrackInfo from "./TrackInfo";
 export default {
   name: "MainSection",
   components: {
     SideBar,
     EmptyIntroPage,
-    ControlCluster
+    ControlCluster,
+    TrackInfo
   },
   computed: {
     bannerUrl() {
-      return "https://images.unsplash.com/photo-1444623151656-030273ddb785?ixlib=rb-1.2.1&auto=format&fit=crop&w=2250&q=80";
+      const defaultImg =
+        "https://images.unsplash.com/photo-1444623151656-030273ddb785?ixlib=rb-1.2.1&auto=format&fit=crop&w=2250&q=80";
+      if (this.currentState.matches("main.ready")) {
+        const { tracks, currentTrack } = this.currentState.context;
+        const trackImg = tracks[currentTrack].albumArt;
+        if (trackImg) {
+          return trackImg;
+        }
+      }
+      return defaultImg;
     }
   },
   created() {
@@ -49,22 +66,21 @@ export default {
 <style lang="scss">
 @import "@/main.scss";
 .root {
-  overflow: hidden;
   position: relative;
   display: flex;
   height: 100%;
   width: 100%;
 }
 .main {
-  width: 100%;
-  height: 100%;
+  flex-grow: 2;
   background-color: #f9f9f9;
   padding: 3rem;
   position: relative;
 }
 .sideBar {
-  width: 30rem;
-  height: 100%;
+  flex-basis: 25rem;
+  flex-shrink: 0;
+  display: flex;
   background-color: $bg-sidebar;
 }
 .banner {
@@ -80,7 +96,6 @@ export default {
   background-position: center center;
   width: 100%;
   height: 100%;
-  position: relative;
   filter: blur(12px);
 
   &:after {
@@ -99,5 +114,5 @@ export default {
   left: 0;
   bottom: 0;
   width: 100%;
-}</style
->>
+}
+</style>

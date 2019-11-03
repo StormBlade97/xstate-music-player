@@ -42,8 +42,11 @@ const loadNewTrackService = (blob, id) => async cb => {
   // fetch lyrics
   cb({
     type: "LOAD_TRACK_SUCCESS",
-    id
+    payload: {
+      id
+    }
   });
+
   return () => {};
 };
 

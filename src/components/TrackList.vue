@@ -1,41 +1,43 @@
 <template>
-  <div>
-    <div class="scroll-box outer">
-      <div
-        data-test="track-item"
-        class="track-item level is-marginless animation-on-hover is-clipped anchor fade-left"
-        :class="[
-          activeTrack &&
-            item.id === activeTrack.id &&
-            'has-text-primary has-text-weight-medium'
-        ]"
-        v-for="(item, index) in trackList"
-        :key="item.id"
-        @click="() => selectTrack(index)"
-      >
-        <div class="level-left track-info">
+  <div class="full-width">
+    <div
+      data-test="track-item"
+      class="track-item level is-marginless animation-on-hover is-clipped anchor fade-left"
+      :class="[
+        activeTrack &&
+          item.id === activeTrack.id &&
+          'has-text-primary has-text-weight-medium'
+      ]"
+      v-for="(item, index) in trackList"
+      :key="item.id"
+      @click="() => selectTrack(index)"
+    >
+      <div class="level-left track-info">
+        <div class="album-art level-item anchor">
           <img
-            class="album-art is-marginless image level-item anchor"
+            v-if="item.albumArt"
+            class="is-marginless image is-overlay"
             :src="item.albumArt"
           />
-          <div class="track-name level-item anchor is-clipped fade-right">
-            <div class="full-width">
-              <div class="level is-vertical info-box marquee">
-                <div class="level-item is-justified-start">
-                  <p class="is-size-6 has-text-weight-semibold">
-                    {{ item.title || item.id }}
-                  </p>
-                </div>
-                <div class="level-item">
-                  <p v-if="item.artist" class="is-size-6">{{ item.artist }}</p>
-                </div>
+        </div>
+
+        <div class="track-name level-item anchor is-clipped fade-right">
+          <div class="full-width">
+            <div class="level is-vertical info-box marquee">
+              <div class="level-item is-justified-start">
+                <p class="is-size-6 has-text-weight-semibold">
+                  {{ item.title || item.id }}
+                </p>
+              </div>
+              <div class="level-item">
+                <p v-if="item.artist" class="is-size-6">{{ item.artist }}</p>
               </div>
             </div>
           </div>
         </div>
-        <div class="track-duration">
-          <p>{{ getTextDur(item.duration) }}</p>
-        </div>
+      </div>
+      <div class="track-duration">
+        <p>{{ getTextDur(item.duration) }}</p>
       </div>
     </div>
   </div>
@@ -67,15 +69,10 @@ export default {
   }
 };
 </script>
-<style lang="scss" scoped>
+<style lang="scss">
 @import "@/main.scss";
 @import "~bulma/sass/utilities/initial-variables.sass";
 
-.outer {
-  overflow-y: auto;
-  width: 100%;
-  height: 100%;
-}
 .track-item {
   padding: 0.5rem 0;
   cursor: pointer;
@@ -85,7 +82,7 @@ export default {
   height: 3rem;
   border-radius: $radius-medium;
   background: linear-gradient(
-    to right,
+    75deg,
     #b8cbb8 0%,
     #b8cbb8 0%,
     #b465da 0%,
@@ -93,6 +90,11 @@ export default {
     #ee609c 66%,
     #ee609c 100%
   );
+  & .image {
+    width: inherit;
+    height: inherit;
+    border-radius: inherit;
+  }
 }
 .track-info {
   flex-grow: 2;

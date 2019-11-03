@@ -1,32 +1,30 @@
 <template>
-  <section class="section empty-intro">
-    <div class="container">
-      <p class="title is-1">Unleash your tune.</p>
-      <p class="subtitle">
-        Play local music with ease from the browser. No download required
+  <div>
+    <p class="title is-1">Unleash your tune.</p>
+    <p class="subtitle">
+      Play local music with ease from the browser. No download required
+    </p>
+    <hr class="has-background-dark divider-short" />
+    <div class="ads">
+      <p>
+        Access your local musics with ease from any where. No download needed
       </p>
-      <hr class="has-background-dark divider-short" />
-      <div class="ads">
-        <p>
-          Access your local musics with ease from any where. No download needed
-        </p>
-        <p>Empower your musical experience with lyrics and knowledge.</p>
-        <div class="ads-grid">
-          <div class="item is-boxed" :key="id" v-for="(item, id) in ads">
-            <div class="icon-art">
-              <span class="icon is-size-1">
-                <i class="bx" :class="`bx-${item.icon}`"></i>
-              </span>
-            </div>
-            <div>
-              <p class="is-size-6 has-text-weight-semibold">{{ item.main }}</p>
-              <p class="tagline-text">{{ item.tagline }}</p>
-            </div>
+      <p>Empower your musical experience with lyrics and knowledge.</p>
+      <div class="ads-grid">
+        <div class="item is-boxed" :key="id" v-for="(item, id) in ads">
+          <div class="icon-art">
+            <span class="icon is-size-1">
+              <i class="bx" :class="`bx-${item.icon}`"></i>
+            </span>
+          </div>
+          <div>
+            <p class="is-size-6 has-text-weight-semibold">{{ item.main }}</p>
+            <p class="tagline-text">{{ item.tagline }}</p>
           </div>
         </div>
       </div>
     </div>
-  </section>
+  </div>
 </template>
 
 <script>
@@ -97,8 +95,5 @@ export default {
 }
 .intro-logo {
   padding: 0.25rem;
-}
-.empty-intro {
-  margin-top: 6rem;
 }
 </style>

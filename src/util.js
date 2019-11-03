@@ -30,3 +30,6 @@ export function parseDuration(duration = 0) {
   const min = Math.floor(duration / 60);
   return `${min}:${("0" + sec).slice(-2)}`;
 }
+
+export const bound = (upper, lower) => val =>
+  Math.max(Math.min(upper, val), lower);
