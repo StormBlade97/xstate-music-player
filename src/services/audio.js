@@ -14,11 +14,7 @@ function getAlbumArt(metadata) {
     return "";
   }
 }
-export function parseDuration(duration = 0) {
-  const sec = duration % 60;
-  const min = Math.floor(duration / 60);
-  return `${min}:${("0" + sec).slice(-2)}`;
-}
+
 export async function extractAudioMetadata(blob) {
   const metadata = await musicMetadata.parseBlob(blob);
   return metadata;
@@ -39,7 +35,7 @@ const loadNewTrackService = (blob, id) => async cb => {
       albumArt: getAlbumArt(metadata),
       title: metadata.common.title,
       artist: metadata.common.artist,
-      duration: parseDuration(metadata.format.duration)
+      duration: metadata.format.duration
     }
   });
   // enrich data

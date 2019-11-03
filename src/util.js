@@ -24,3 +24,9 @@ export function mapFileListToArray(fileList) {
   }
   return acc;
 }
+
+export function parseDuration(duration = 0) {
+  const sec = Math.floor(duration) % 60;
+  const min = Math.floor(duration / 60);
+  return `${min}:${("0" + sec).slice(-2)}`;
+}

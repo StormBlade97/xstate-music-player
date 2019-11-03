@@ -5,7 +5,9 @@
         data-test="track-item"
         class="track-item level is-marginless animation-on-hover is-clipped anchor fade-left"
         :class="[
-          item === activeTrack && 'has-text-primary has-text-weight-medium'
+          activeTrack &&
+            item.id === activeTrack.id &&
+            'has-text-primary has-text-weight-medium'
         ]"
         v-for="(item, index) in trackList"
         :key="item.id"
@@ -32,22 +34,26 @@
           </div>
         </div>
         <div class="track-duration">
-          <p>{{ item.duration }}</p>
+          <p>{{ getTextDur(item.duration) }}</p>
         </div>
       </div>
     </div>
   </div>
 </template>
 <script>
+import { parseDuration } from "@/util";
 export default {
   name: "TrackList",
   methods: {
     selectTrack(index) {
       this.send({
         type: "SELECT_TRACK",
-        index: index
+        payload: {
+          index
+        }
       });
-    }
+    },
+    getTextDur: parseDuration
   },
   computed: {
     trackList() {

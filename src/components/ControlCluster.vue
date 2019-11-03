@@ -11,21 +11,21 @@
           </span>
         </button>
         <button
-          v-if="this.currentState.matches('playback.playing')"
+          v-if="this.currentState.matches('ready.playback.playing')"
+          class="button is-medium is-borderless is-rounded is-white is-primary"
+          @click="() => this.send('PAUSE')"
+        >
+          <span class="icon is-size-5">
+            <i class="bx bx-pause bx-md"></i>
+          </span>
+        </button>
+        <button
+          v-else
           class="button is-medium is-borderless is-rounded is-white is-primary"
           @click="() => this.send('PLAY')"
         >
           <span class="icon is-size-5">
             <i class="bx bx-play bx-md"></i>
-          </span>
-        </button>
-        <button
-          class="button is-medium is-borderless is-rounded is-white is-primary"
-          v-else
-          @click="() => this.send('PAUSE')"
-        >
-          <span class="icon is-size-5">
-            <i class="bx bx-pause bx-md"></i>
           </span>
         </button>
 
@@ -72,23 +72,27 @@
       <div class="buttons">
         <button
           class="button is-borderless is-rounded is-white"
-          :class="{ 'is-primary': currentState.matches('shuffle.on') }"
+          :class="{
+            'has-text-primary': currentState.matches('ready.shuffle.enabled')
+          }"
           @click="() => this.send('TOGGLE_SHUFFLE')"
         >
-          <span class="icon">
-            <i class="bx bx-shuffle bx-sm"></i>
+          <span class="icon is-size-5">
+            <i class="bx bx-shuffle"></i>
           </span>
         </button>
         <button
           class="button is-borderless is-rounded is-white"
           :class="{
-            'is-primary': !currentState.matches('repeat.noRepeat')
+            'has-text-primary':
+              currentState.matches('ready.repeat.once') ||
+              currentState.matches('ready.repeat.all')
           }"
           @click="() => this.send('TOGGLE_REPEAT')"
         >
           <span class="icon">
             <i
-              v-if="!currentState.matches('repeat.all')"
+              v-if="!currentState.matches('ready.repeat.all')"
               class="bx bx-repeat bx-sm"
             ></i>
             <i v-else class="bx bx-infinite bx-sm"></i>

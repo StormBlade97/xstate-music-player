@@ -1,11 +1,12 @@
-import { Machine, interpret, assign, spawn } from "xstate";
+import { Machine, interpret, assign, spawn, send } from "xstate";
 import loadNewTrackService from "./services/audio";
 
 const statechartsDef = {
   id: "musicPlayer",
   context: {
     tracks: [],
-    currentTrack: null
+    currentTrack: 0,
+    currentTime: 0
   },
   initial: "empty",
   on: {
@@ -28,48 +29,54 @@ const statechartsDef = {
     },
     ready: {
       type: "parallel",
-      entry: ["selectTrack", "play"],
-      on: {
-        SELECT_TRACK: {
-          target: "ready",
-          actions: "setSelectedTrack"
-        }
-      },
       states: {
         playback: {
           initial: "paused",
+          on: {
+            SELECT_TRACK: {
+              target: ".paused",
+              actions: ["setSelectedTrack", send("PLAY")]
+            },
+            SEEK: {
+              actions: "seekTo"
+            }
+          },
           states: {
             paused: {
               on: {
                 PLAY: {
-                  target: "attemptingPlay",
-                  actions: "play"
+                  target: "attemptingPlay"
                 }
               }
             },
             attemptingPlay: {
-              on: {
-                "": [
-                  {
-                    target: "playing",
-                    cond: "isPlaying"
-                  },
-                  {
-                    target: "paused",
-                    cond: "isNotPlaying"
-                  }
-                ]
+              invoke: {
+                id: "attemptPlayProcess",
+                src: "playAttempt",
+                onError: {
+                  target: "paused"
+                },
+                onDone: {
+                  target: "playing"
+                }
               }
             },
             playing: {
+              invoke: {
+                id: "playingDaemon",
+                src: "playingProcess"
+              },
               on: {
                 PAUSE: {
                   target: "paused",
-                  actions: "pause"
+                  actions: "pauseTrack"
                 },
                 END: {
                   target: "paused",
-                  actions: ["pause", "resetToTrack"]
+                  actions: ["pauseTrack", "resetToZero"]
+                },
+                UPDATE_TIME: {
+                  actions: "updateTrackCurrentTime"
                 }
               }
             }
@@ -162,13 +169,11 @@ export const actionsAndServices = {
             id
           };
         });
-        console.error("Initial update process");
         return context.tracks.concat(newTracks);
       }
     }),
     updateTrackInfo: assign({
       tracks: (context, event) => {
-        console.error("Track update");
         const { payload } = event;
         const foundIndex = context.tracks.findIndex(
           elem => elem.id === payload.id
@@ -187,7 +192,6 @@ export const actionsAndServices = {
       }
     }),
     uploadFinalization: (context, event) => {
-      console.error("This run!");
       const { id } = event.payload;
       const target = context.tracks.find(elem => elem.id === id);
       if (target) {
@@ -195,11 +199,67 @@ export const actionsAndServices = {
       } else {
         console.error(`Failed to clean up track upload process`);
       }
+    },
+    setSelectedTrack: assign({
+      currentTrack: (context, event) => event.payload.index
+    }),
+    pauseTrack: context => {
+      const { tracks, currentTrack } = context;
+      tracks[currentTrack].audioElem.pause();
+    },
+    seekTo: assign({
+      currentTime: (context, event) => {
+        const { tracks, currentTrack } = context;
+        tracks[currentTrack].audioElem.currentTime = event.payload.toTime;
+        return event.payload.toTime;
+      }
+    }),
+    resetToZero: send({
+      type: "SEEK",
+      payload: {
+        toTime: 0
+      }
+    }),
+    updateTrackCurrentTime: assign({
+      currentTime: (c, e) => e.payload.currentTime
+    })
+  },
+  services: {
+    playAttempt: context => {
+      return context.tracks[context.currentTrack].audioElem.play();
+    },
+    playingProcess: context => cb => {
+      const { tracks, currentTrack } = context;
+      const { audioElem } = tracks[currentTrack];
+      const trackTimeCallback = event => {
+        cb({
+          type: "UPDATE_TIME",
+          payload: {
+            currentTime: event.target.currentTime
+          }
+        });
+        if (event.target.ended) {
+          cb("END");
+        }
+      };
+
+      audioElem.addEventListener("timeupdate", trackTimeCallback);
+
+      return () => {
+        audioElem.removeEventListener("timeupdate", trackTimeCallback);
+        audioElem.pause();
+      };
     }
   },
   guards: {
     trackNotExist: (context, event) => {
       return !context.tracks.find(elem => elem.id === event.payload.id);
+    },
+    hasMultipleTracks: context => {
+      return context.tracks.length > 1;
+    },
+    hasOneTrack: context => {
+      return context.tracks.length <= 1;
     }
   }
 };

@@ -10,6 +10,7 @@ const store = new Vuex.Store({
   },
   actions: {
     sendEvent(ctx, event) {
+      console.log(event);
       musicPlayerService.send(event);
     }
   },

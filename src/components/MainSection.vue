@@ -14,7 +14,7 @@
         data-test="empty-intro-page"
         v-if="this.currentState.matches('empty')"
       ></EmptyIntroPage>
-      <div class="control-bar">
+      <div class="control-bar" v-if="this.currentState.matches('ready')">
         <ControlCluster></ControlCluster>
       </div>
     </div>
