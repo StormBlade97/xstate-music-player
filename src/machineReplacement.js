@@ -1,13 +1,14 @@
 import { Machine, interpret, assign, spawn, send } from "xstate";
 import loadNewTrackService from "./services/audio";
-import { bound } from "@/util";
+import { bound, shuffleArray } from "@/util";
 
 const statechartsDef = {
   id: "musicPlayer",
   context: {
     tracks: [],
     currentTrack: 0,
-    currentTime: 0
+    currentTime: 0,
+    originalTracks: []
   },
   type: "parallel",
   states: {
@@ -165,12 +166,18 @@ const statechartsDef = {
               states: {
                 enabled: {
                   on: {
-                    TOGGLE_SHUFFLE: "noShuffle"
+                    TOGGLE_SHUFFLE: {
+                      target: "noShuffle",
+                      actions: "unshufflePlaylist"
+                    }
                   }
                 },
                 noShuffle: {
                   on: {
-                    TOGGLE_SHUFFLE: "enabled"
+                    TOGGLE_SHUFFLE: {
+                      target: "enabled",
+                      actions: "shufflePlaylist"
+                    }
                   }
                 }
               }
@@ -291,7 +298,30 @@ export const actionsAndServices = {
       payload: {
         toTime: (context.currentTime += 10 * (event.payload.forward ? 1 : -1))
       }
-    }))
+    })),
+    shufflePlaylist: assign(context => {
+      const currentId = context.tracks[context.currentTrack].id;
+      const result = {
+        ...context,
+        originalTracks: [...context.tracks]
+      };
+      shuffleArray(result.tracks);
+      result.currentTrack = result.tracks.findIndex(e => e.id === currentId);
+      return result;
+    }),
+    unshufflePlaylist: assign(context => {
+      const { originalTracks, tracks, currentTrack } = context;
+      const itemsToAppend = tracks.filter((_, i) => i >= originalTracks.length);
+      const currentId = tracks[currentTrack].id;
+      const restoredOriginal = originalTracks.concat(itemsToAppend);
+      const result = {
+        ...context,
+        originalTracks: [],
+        tracks: restoredOriginal,
+        currentTrack: restoredOriginal.findIndex(e => e.id === currentId)
+      };
+      return result;
+    })
   },
   services: {
     playAttempt: context => {
