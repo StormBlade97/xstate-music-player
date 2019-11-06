@@ -72,20 +72,48 @@ app.use("/search", async (req, res) => {
     .catch(() => res.send(500));
 });
 app.use(
-  "/album-arts",
+  "/enrichment",
   async (request, response, next) => {
     const { q } = request.query;
     try {
+      let payload;
       const { body } = await spotifyApi.searchTracks(q);
-      const { id, name, album } = body.tracks.items[0];
-      const { images, artists } = album;
-      response.json({ id, images, artists, name });
+      if (body.tracks.length < 1) {
+        return response.send(404).json({
+          msg: "No track found"
+        });
+      }
+      const { id, name, album, explicit } = body.tracks.items[0];
+      const { images, artists, id: albumId } = album;
+
+      payload = {
+        id,
+        albumArt: images[0].url,
+        artist: artists[0].name,
+        title: name,
+        explicit
+      };
+
+      const [
+        { body: albumRsp },
+        { body: trackAnalysisRsp }
+      ] = await Promise.all([
+        spotifyApi.getAlbumTracks(albumId),
+        spotifyApi.getAudioFeaturesForTrack(id)
+      ]);
+      payload.album = {
+        id: albumId,
+        tracks: albumRsp.items
+      };
+      payload.audioFeature = trackAnalysisRsp;
+      response.status(200).json(payload);
     } catch (error) {
       next(error);
     }
   },
   handleError
 );
+
 app.use("*", proxy({ target: "http://localhost:8080", changeOrigin: true }));
 
 app.listen(3000, async () => {

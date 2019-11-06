@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="empty-intro-container">
     <p class="title is-1">Unleash your tune.</p>
     <p class="subtitle">
       Play local music with ease from the browser. No download required
@@ -55,6 +55,9 @@ export default {
 </script>
 
 <style lang="scss">
+.empty-intro-container {
+  margin-top: 6rem;
+}
 .divider-short {
   width: 15rem;
   border-radius: 4px;

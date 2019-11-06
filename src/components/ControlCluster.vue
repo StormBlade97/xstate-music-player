@@ -4,7 +4,7 @@
       <div class="level-item">
         <div class="buttons">
           <button
-            class="button is-borderless is-rounded is-white"
+            class="button is-borderless is-rounded is-transparent"
             @click="() => this.send('PREV')"
           >
             <span class="icon is-large">
@@ -13,7 +13,7 @@
           </button>
           <button
             v-if="this.currentState.matches('main.ready.playback.playing')"
-            class="button is-medium is-borderless is-rounded is-white is-primary"
+            class="button is-medium is-borderless is-rounded has-background-gradient has-text-white"
             @click="() => this.send('PAUSE')"
           >
             <span class="icon is-size-5">
@@ -22,7 +22,7 @@
           </button>
           <button
             v-else
-            class="button is-medium is-borderless is-rounded is-white is-primary"
+            class="button is-medium is-borderless is-rounded has-background-gradient has-neon-shadow is-primary"
             @click="() => this.send('PLAY')"
           >
             <span class="icon is-size-5">
@@ -31,7 +31,7 @@
           </button>
 
           <button
-            class="button is-borderless is-white is-rounded"
+            class="button is-borderless is-transparent is-rounded"
             @click="() => this.send('NEXT')"
           >
             <span class="icon">
@@ -46,7 +46,7 @@
       <div class="level-item">
         <div class="buttons">
           <button
-            class="button is-borderless is-rounded is-white"
+            class="button is-borderless is-rounded is-transparent"
             @click="
               () => this.send({ type: 'SKIP_TEN', payload: { forward: false } })
             "
@@ -56,7 +56,7 @@
             </span>
           </button>
           <button
-            class="button is-borderless is-rounded is-white is-relative"
+            class="button is-borderless is-rounded is-transparent is-relative"
             :class="{
               'is-primary': currentState.matches('playback.playing.fastfwd')
             }"
@@ -68,14 +68,10 @@
               <i class="bx bx-fast-forward bx-sm"></i>
             </span>
           </button>
-        </div>
-      </div>
-      <div class="level-item">
-        <div class="buttons">
           <button
-            class="button is-borderless is-rounded is-white"
+            class="button is-borderless is-rounded is-transparent"
             :class="{
-              'has-text-primary': currentState.matches(
+              'has-text-gradient has-neon-shadow-text': currentState.matches(
                 'main.ready.shuffle.enabled'
               )
             }"
@@ -86,9 +82,9 @@
             </span>
           </button>
           <button
-            class="button is-borderless is-rounded is-white"
+            class="button is-borderless is-rounded is-transparent"
             :class="{
-              'has-text-primary':
+              'has-text-gradient has-neon-shadow-text':
                 currentState.matches('main.ready.repeat.once') ||
                 currentState.matches('main.ready.repeat.all')
             }"
@@ -122,20 +118,15 @@ export default {
 .is-borderless {
   border-color: transparent;
 }
-@keyframes pulse {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-.checking {
-  border: 1px $red solid !important;
-}
+
 .grow-2 {
   flex-grow: 2;
   flex-shrink: 1;
   flex-basis: 50%;
+}
+button {
+  border: none !important;
+  outline: transparent !important;
+  transition: all 0.5s;
 }
 </style>

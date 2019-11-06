@@ -1,3 +1,6 @@
+$primary: #43e97b !default;
+$secondary: #38f9d7 !default;
+
 @keyframes marquee {
   15% {
     transform: translate(0);
@@ -12,4 +15,98 @@
       animation: marquee 4s linear infinite;
     }
   }
+}
+
+@keyframes AnimationName {
+  0% {
+    background-position: 84% 0%;
+  }
+  50% {
+    background-position: 17% 100%;
+  }
+  100% {
+    background-position: 84% 0%;
+  }
+}
+.has-background-animation {
+  background: linear-gradient(
+    215deg,
+    $primary,
+    $secondary,
+    #1a1a1a,
+    #000000
+  ) !important;
+  background-size: 800% 800% !important ;
+  animation: AnimationName 4s ease infinite;
+}
+
+@keyframes fade {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.1;
+  }
+  75% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+.has-fade-animation {
+  animation: fade 4s ease infinite;
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(90deg);
+  }
+  75% {
+    transform: rotate(180deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.has-rotation-animation {
+  animation: rotate 4s ease infinite;
+}
+
+@keyframes blur {
+  0% {
+    filter: blur(0px);
+  }
+  40% {
+    filter: blur(2px);
+  }
+  80% {
+    filter: blur(3px);
+  }
+  100% {
+    filter: blur(4px);
+  }
+}
+.has-blur-animation {
+  animation: blur 0.3s linear 1;
+  animation-fill-mode: both;
+}
+
+@keyframes beat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  10% {
+    transform: scale(1.25);
+  }
+  15% {
+    transform: scale(1);
+  }
+}
+.has-beat-animation {
+  animation: beat 2s ease-in infinite;
 }

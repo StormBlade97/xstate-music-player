@@ -1,17 +1,38 @@
-$primary: #b721ff;
+$primary: #c471f5;
+$secondary: #fa71cd;
 $file-radius: 0;
 $radius-medium: 8px;
 $radius-large: 1rem;
-$bg-sidebar: rgb(228, 228, 228);
+$bg-sidebar: rgb(20, 20, 20);
+$bg-main: rgb(29, 29, 29);
+@import "@/animation.scss";
+@import "../node_modules/bulmaswatch/cyborg/variables";
+$button-active-color: white;
 
 @import "../node_modules/bulma/bulma.sass";
-@import "@/animation.scss";
+@import "../node_modules/bulmaswatch/cyborg/overrides";
 
 html,
 body,
 #app {
   width: 100%;
   height: 100%;
+}
+
+.has-text-gradient {
+  background: linear-gradient(120deg, $primary, $secondary);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.has-background-gradient {
+  background: linear-gradient(120deg, $primary, $secondary) !important;
+}
+.has-neon-shadow {
+  box-shadow: 0 12px 24px rgba($primary, 25%), 0 4px 30px rgba($secondary, 15%);
+}
+.has-neon-shadow-text {
+  text-shadow: -6px 0px 12px rgba($primary, 50%),
+    6px 0px 12px rgba($secondary, 50%);
 }
 
 .fade-left {
@@ -37,6 +58,29 @@ body,
     background: linear-gradient(to right, $bg-sidebar 40%, transparent);
   }
 }
+.fade-top {
+  &:after {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 1rem;
+    top: 0;
+    left: 0;
+    background: linear-gradient(to bottom, $bg-sidebar 40%, transparent);
+  }
+}
+.fade-bottom {
+  &:before {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 1rem;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+    background: linear-gradient(to top, $bg-sidebar 40%, transparent);
+  }
+}
 
 .level.is-vertical {
   flex-direction: column !important;
@@ -44,4 +88,16 @@ body,
 
 .anchor {
   position: relative;
+}
+.is-shrinkable {
+  flex-shrink: 1 !important;
+}
+.is-unshrinkable {
+  flex-shrink: 0;
+}
+.is-flex-wrappable {
+  flex-wrap: wrap !important;
+}
+.button.is-transparent {
+  background-color: transparent !important;
 }

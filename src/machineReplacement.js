@@ -162,17 +162,17 @@ const statechartsDef = {
               }
             },
             shuffle: {
-              initial: "noShuffle",
+              initial: "disabled",
               states: {
                 enabled: {
                   on: {
                     TOGGLE_SHUFFLE: {
-                      target: "noShuffle",
+                      target: "disabled",
                       actions: "unshufflePlaylist"
                     }
                   }
                 },
-                noShuffle: {
+                disabled: {
                   on: {
                     TOGGLE_SHUFFLE: {
                       target: "enabled",
@@ -249,8 +249,7 @@ export const actionsAndServices = {
         const { tracks, currentTrack } = context;
         const duration = tracks[currentTrack].duration;
         const dest = bound(duration, 0)(event.payload.toTime);
-
-        tracks[currentTrack].audioElem.currentTime = dest;
+        tracks[currentTrack].audioElem.currentTime = dest || 0;
         return dest;
       }
     }),

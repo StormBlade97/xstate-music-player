@@ -3,7 +3,7 @@
     <div class="sideBar">
       <SideBar></SideBar>
     </div>
-    <div class="main is-clipped">
+    <div class="main">
       <div class="banner">
         <div
           class="banner-img anchor"
@@ -73,9 +73,10 @@ export default {
 }
 .main {
   flex-grow: 2;
-  background-color: #f9f9f9;
+  background-color: $bg-main;
   padding: 3rem;
   position: relative;
+  overflow-y: auto;
 }
 .sideBar {
   flex-basis: 25rem;
@@ -106,11 +107,11 @@ export default {
     left: 0;
     bottom: 0;
     z-index: 1;
-    background: linear-gradient(to top, #f9f9f9, transparent);
+    background: linear-gradient(to top, $bg-main, transparent);
   }
 }
 .control-bar {
-  position: absolute;
+  position: fixed;
   left: 0;
   bottom: 0;
   width: 100%;
