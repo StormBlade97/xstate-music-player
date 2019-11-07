@@ -96,6 +96,8 @@ export default {
   }
   & > img {
     z-index: 3;
+    object-fit: cover;
+    height: 100%;
   }
 }
 .centerize {

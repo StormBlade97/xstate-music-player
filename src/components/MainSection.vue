@@ -3,21 +3,23 @@
     <div class="sideBar">
       <SideBar></SideBar>
     </div>
-    <div class="main">
-      <div class="banner">
-        <div
-          class="banner-img anchor"
-          :style="{ backgroundImage: `url('${bannerUrl}')` }"
-        ></div>
-      </div>
-      <div class="section">
-        <div class="container">
-          <EmptyIntroPage
-            data-test="empty-intro-page"
-            v-if="this.currentState.matches('main.empty')"
-          ></EmptyIntroPage>
-          <TrackInfo v-else />
+    <div class="main anchor is-clipped">
+      <div class="inner-scroll anchor">
+        <div class="banner">
+          <div
+            class="banner-img anchor"
+            :style="{ backgroundImage: `url('${bannerUrl}')` }"
+          ></div>
         </div>
+        <section class="section">
+          <div class="container">
+            <EmptyIntroPage
+              data-test="empty-intro-page"
+              v-if="this.currentState.matches('main.empty')"
+            ></EmptyIntroPage>
+            <TrackInfo v-else />
+          </div>
+        </section>
       </div>
 
       <div class="control-bar" v-if="this.currentState.matches('main.ready')">
@@ -74,9 +76,11 @@ export default {
 .main {
   flex-grow: 2;
   background-color: $bg-main;
-  padding: 3rem;
-  position: relative;
-  overflow-y: auto;
+}
+.inner-scroll {
+  overflow: auto;
+  width: 100%;
+  height: 100%;
 }
 .sideBar {
   flex-basis: 25rem;
@@ -86,10 +90,10 @@ export default {
 }
 .banner {
   position: absolute;
-  width: 110%;
+  width: 100%;
   height: 30%;
-  top: -5%;
-  left: -5%;
+  top: 0;
+  left: 0;
   z-index: 0;
 }
 .banner-img {
@@ -111,7 +115,7 @@ export default {
   }
 }
 .control-bar {
-  position: fixed;
+  position: absolute;
   left: 0;
   bottom: 0;
   width: 100%;
