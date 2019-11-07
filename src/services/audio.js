@@ -1,84 +1,82 @@
 /* Collection of audio related functions */
-import * as musicMetadata from "music-metadata-browser";
-import axios from "axios";
+import { processorScript } from "./metadata-extractor";
+import Worker from "./extractMedataWorker.worker";
 
-export function getObjectUrl(blob) {
-  return URL.createObjectURL(blob);
-}
-function getAlbumArt(metadata) {
-  try {
-    const ref = metadata.common.picture[0];
-    if (ref && ref.data && ref.format) {
-      const base64Data = btoa(String.fromCharCode.apply(null, ref.data));
-      return "data:image/png;base64," + base64Data;
-    }
-  } catch (error) {
-    return "";
-  }
-}
-
-export async function extractAudioMetadata(blob) {
-  const metadata = await musicMetadata.parseBlob(blob);
-  return metadata;
-}
-
-const loadNewTrackService = (blob, id) => async cb => {
-  const src = URL.createObjectURL(blob);
-  const audioElem = new Audio(src);
-  const metadata = await musicMetadata.parseBlob(blob);
-  let retryLeft = 10;
-
-  cb({
-    type: "CHILD_UPDATE",
-    payload: {
-      id,
-      src,
-      audioElem,
-      metadata,
-      albumArt: getAlbumArt(metadata),
-      title: metadata.common.title,
-      artist: metadata.common.artist,
-      duration: metadata.format.duration,
-      explicit: metadata.common.explicit
-    }
-  });
-  // enrich data
-  while (retryLeft > 0) {
+const loadNewTrackService = (file, id) => async cb => {
+  let myWorker = null;
+  if (Worker) {
     try {
-      const query = metadata.common.title
-        ? `${metadata.common.title} - ${metadata.common.artist}`
-        : id.split(".")[0].replace(/\([^()]*\)/g, "");
-      const response = await axios.get(`/enrichment?q=${query}`);
-      cb({
-        type: "CHILD_UPDATE",
-        payload: {
-          ...response.data,
-          id,
-          error: null
-        }
-      });
-      retryLeft = 0;
+      myWorker = new Worker();
+      myWorker.postMessage(file);
+      myWorker.onmessage = e => {
+        cb({
+          type: "CHILD_UPDATE",
+          payload: { ...e.data, id }
+        });
+        cb({
+          type: "LOAD_TRACK_SUCCESS",
+          payload: {
+            id
+          }
+        });
+      };
     } catch (error) {
+      console.error(error);
+    }
+  } else {
+    console.log(
+      "Worker feature is not available. Processing file in mainthread!"
+    );
+    processorScript(file, extracted => {
       cb({
         type: "CHILD_UPDATE",
+        payload: { ...extracted, id }
+      });
+
+      cb({
+        type: "LOAD_TRACK_SUCCESS",
         payload: {
-          id,
-          error: "Enrichment error"
+          id
         }
       });
-      retryLeft--;
-    }
+    });
   }
+
+  // }
+
+  // // enrich data
+  // while (retryLeft > 0) {
+  //   try {
+  //     const query = metadata.common.title
+  //       ? `${metadata.common.title} - ${metadata.common.artist}`
+  //       : id.split(".")[0].replace(/\([^()]*\)/g, "");
+  //     const response = await axios.get(`/enrichment?q=${query}`);
+  //     cb({
+  //       type: "CHILD_UPDATE",
+  //       payload: {
+  //         ...response.data,
+  //         id,
+  //         error: null
+  //       }
+  //     });
+  //     retryLeft = 0;
+  //   } catch (error) {
+  //     cb({
+  //       type: "CHILD_UPDATE",
+  //       payload: {
+  //         id,
+  //         error: "Enrichment error"
+  //       }
+  //     });
+  //     retryLeft--;
+  //   }
+  // }
 
   // fetch lyrics
-  cb({
-    type: "LOAD_TRACK_SUCCESS",
-    payload: {
-      id
-    }
-  });
 
-  return () => {};
+  return () => {
+    myWorker.terminate();
+  };
 };
 
 export default loadNewTrackService;

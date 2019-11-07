@@ -80,23 +80,20 @@ export default {
     imgSrc() {
       return this.currentTrack.albumArt;
     },
-    lyrics() {
-      return (
-        this.currentTrack.metadata.common.lyrics &&
-        this.currentTrack.metadata.common.lyrics[0]
-      );
-    },
     hasMetadata() {
       return this.currentTrack.metadata;
     },
     commonMetadata() {
-      return Object.entries(this.currentTrack.metadata.common)
-        .map(([k, v]) => {
-          if (isObject(v)) return [k, "No information"];
-          if (isArray(v)) return [k, v.join(";")];
-          return [k, v];
-        })
-        .filter(entry => entry[1]);
+      if (this.currentTrack.metadata) {
+        return Object.entries(this.currentTrack.metadata.common)
+          .map(([k, v]) => {
+            if (isObject(v)) return [k, "No information"];
+            if (isArray(v)) return [k, v.join(";")];
+            return [k, v];
+          })
+          .filter(entry => entry[1]);
+      }
+      return null;
     }
   }
 };

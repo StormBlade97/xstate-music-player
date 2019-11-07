@@ -37,55 +37,95 @@ const statechartsDef = {
           type: "parallel",
           states: {
             playback: {
-              initial: "paused",
+              initial: "checkingAudioLoaded",
               on: {
                 SELECT_TRACK: {
-                  target: ".paused",
-                  actions: ["resetToZero", "setSelectedTrack", send("PLAY")]
-                },
-                SEEK: {
-                  actions: "seekTo"
-                },
-                SKIP_TEN: {
-                  actions: "skip10"
+                  actions: ["setSelectedTrack"]
                 }
               },
               states: {
-                paused: {
+                checkingAudioLoaded: {
                   on: {
-                    PLAY: {
-                      target: "attemptingPlay"
-                    }
+                    "": [
+                      {
+                        target: "loadingAudioData",
+                        cond: "isAudioNotLoaded"
+                      },
+                      {
+                        target: "playable",
+                        cond: "isAudioLoaded"
+                      }
+                    ]
                   }
                 },
-                attemptingPlay: {
-                  invoke: {
-                    id: "attemptPlayProcess",
-                    src: "playAttempt",
-                    onError: {
-                      target: "paused"
-                    },
-                    onDone: {
-                      target: "playing"
-                    }
-                  }
-                },
-                playing: {
-                  invoke: {
-                    id: "playingDaemon",
-                    src: "playingProcess"
+                loadingAudioData: {
+                  after: {
+                    5000: "loadFailed"
                   },
+                  invoke: {
+                    src: "loadBinaryData",
+                    onDone: {
+                      target: "playable",
+                      actions: "updateLoadedBinary"
+                    },
+                    onError: {
+                      target: "loadFailed"
+                    }
+                  }
+                },
+                loadFailed: {
                   on: {
-                    PAUSE: {
-                      target: "paused",
-                      actions: "pauseTrack"
+                    RETRY_LOAD_BINARY: "loadingAudioData"
+                  }
+                },
+                playable: {
+                  initial: "paused",
+                  on: {
+                    SEEK: {
+                      actions: "seekTo"
                     },
-                    END: {
-                      target: "paused",
-                      actions: ["pauseTrack", "resetToZero"]
+                    SKIP_TEN: {
+                      actions: "skip10"
+                    }
+                  },
+                  states: {
+                    paused: {
+                      on: {
+                        PLAY: {
+                          target: "attemptingPlay"
+                        }
+                      }
                     },
-                    UPDATE_TIME: {
-                      actions: "updateTrackCurrentTime"
+                    attemptingPlay: {
+                      invoke: {
+                        id: "attemptPlayProcess",
+                        src: "playAttempt",
+                        onError: {
+                          target: "paused"
+                        },
+                        onDone: {
+                          target: "playing"
+                        }
+                      }
+                    },
+                    playing: {
+                      invoke: {
+                        id: "playingDaemon",
+                        src: "playingProcess"
+                      },
+                      on: {
+                        PAUSE: {
+                          target: "paused",
+                          actions: "pauseTrack"
+                        },
+                        END: {
+                          target: "paused",
+                          actions: ["pauseTrack", "resetToZero"]
+                        },
+                        UPDATE_TIME: {
+                          actions: "updateTrackCurrentTime"
+                        }
+                      }
                     }
                   }
                 }
@@ -200,7 +240,8 @@ export const actionsAndServices = {
             const id = fileRef.name;
             return {
               childProcess: spawn(loadNewTrackService(fileRef, id)),
-              id
+              id,
+              file: fileRef
             };
           });
         const result = context.tracks.concat(newTracks);
@@ -224,6 +265,17 @@ export const actionsAndServices = {
             `Failed to handle event UPDATE_CHILDREN. Reason: TRACK_NOT_FOUND / trackID: ${payload.id}`
           );
         }
+      }
+    }),
+    updateLoadedBinary: assign({
+      tracks: (context, event) => {
+        const { tracks, currentTrack } = context;
+        const b = [].concat(tracks);
+        b.splice(currentTrack, 1, {
+          ...context.tracks[currentTrack],
+          ...event.data
+        });
+        return b;
       }
     }),
     uploadFinalization: (context, event) => {
@@ -346,8 +398,27 @@ export const actionsAndServices = {
       return () => {
         audioElem.removeEventListener("timeupdate", trackTimeCallback);
         audioElem.pause();
+        audioElem.currentTime = 0;
       };
-    }
+    },
+    loadBinaryData: context =>
+      new Promise((resolve, reject) => {
+        const { tracks, currentTrack } = context;
+        // attempt to read file
+        try {
+          const src = URL.createObjectURL(tracks[currentTrack].file);
+          const audioElem = new Audio(src);
+
+          audioElem.addEventListener("canplaythrough", () => {
+            resolve({
+              audioElem,
+              src
+            });
+          });
+        } catch (error) {
+          reject(error);
+        }
+      })
   },
   guards: {
     hasMultipleTracks: context => {
@@ -355,6 +426,14 @@ export const actionsAndServices = {
     },
     hasOneTrack: context => {
       return context.tracks.length <= 1;
+    },
+    isAudioLoaded: context => {
+      const { tracks, currentTrack } = context;
+      return tracks[currentTrack].audioElem;
+    },
+    isAudioNotLoaded: context => {
+      const { tracks, currentTrack } = context;
+      return !tracks[currentTrack].audioElem;
     }
   }
 };
