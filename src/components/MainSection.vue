@@ -45,7 +45,7 @@ export default {
   computed: {
     bannerUrl() {
       const defaultImg =
-        "https://images.unsplash.com/photo-1444623151656-030273ddb785?ixlib=rb-1.2.1&auto=format&fit=crop&w=2250&q=80";
+        "https://images.unsplash.com/photo-1558725175-a40cb9f94824?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80";
       if (this.currentState.matches("main.ready")) {
         const { tracks, currentTrack } = this.currentState.context;
         const trackImg = tracks[currentTrack].albumArt;

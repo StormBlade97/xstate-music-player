@@ -6,7 +6,7 @@
         <UploadButton @loadFile="uploadFile"></UploadButton>
       </div>
       <div class="body">
-        <TrackList v-if="this.currentState.matches('main.ready')"></TrackList>
+        <TrackList v-if="hasTracks"></TrackList>
         <div v-else data-test="sidebar-empty-intro">
           <div class="text-box">
             <p class="title is-3">Hi there</p>
@@ -69,6 +69,11 @@ export default {
           fileArray
         }
       });
+    }
+  },
+  computed: {
+    hasTracks() {
+      return this.currentState.context.tracks.length > 0;
     }
   }
 };

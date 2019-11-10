@@ -7,6 +7,7 @@
       :item="item"
       :isPlaying="checkPlayStatus(item.id)"
       :isActive="activeTrack && activeTrack.id === item.id"
+      :isLoading="!item.loaded"
       :index="index"
       :canBePlayed="true"
       @track-selected="selectTrack"
@@ -33,7 +34,7 @@ export default {
     checkPlayStatus(id) {
       return (
         this.activeTrack.id === id &&
-        this.currentState.matches("main.ready.playback.playing")
+        this.currentState.matches("main.ready.playback.playable.playing")
       );
     }
   },

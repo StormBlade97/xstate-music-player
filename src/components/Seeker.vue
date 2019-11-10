@@ -10,9 +10,18 @@
       @click="updatePosAndSeek"
     >
       <progress
+        v-if="currentState.matches('main.ready.playback.playable')"
         :value="value"
         :max="max"
         class="progress seeker-progress is-primary is-marginless"
+      ></progress>
+      <progress
+        v-if="currentState.matches('main.ready.playback.loadingAudioData')"
+        class="progress seeker-progress is-marginless"
+      ></progress>
+      <progress
+        v-if="currentState.matches('main.ready.playback.loadFailed')"
+        class="progress seeker-progress load-failed is-marginless"
       ></progress>
       <div
         v-if="buttonShown || isAdjusting"
@@ -122,5 +131,8 @@ export default {
 }
 .time-mark {
   margin: 0 1rem;
+}
+.load-failed {
+  opacity: 0.3;
 }
 </style>

@@ -22,14 +22,13 @@
         </span>
       </div>
     </div>
-
     <img
       @load="handleImgLoad"
       @error="handleImgError"
       :src="src"
       alt
-      :v-if="src && LoadStateEnum == LoadStateEnum.SUCCESS"
-      class="image is-overlay is-clipped"
+      :v-if="src && loadStatus == LoadStateEnum.SUCCESS"
+      class="image is-overlay is-clipped has-fade-in-animation"
       key="ii"
       :class="(showHoverControl || isPlaying) && 'has-blur-animation'"
     />

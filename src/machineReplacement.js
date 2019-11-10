@@ -1,10 +1,13 @@
-import { Machine, interpret, assign, spawn, send } from "xstate";
-import loadNewTrackService from "./services/audio";
+import { Machine, interpret, assign, send, spawn } from "xstate";
+import metadataExtractor from "./services/metadataExtractor";
 import { bound, shuffleArray } from "@/util";
 
 const statechartsDef = {
   id: "musicPlayer",
   context: {
+    loadManager: {
+      jobQueue: []
+    },
     tracks: [],
     currentTrack: 0,
     currentTime: 0,
@@ -15,13 +18,10 @@ const statechartsDef = {
     uploadable: {
       on: {
         UPLOAD_TRACK: {
-          actions: "loadNewTrack"
+          actions: ["registerTrack"]
         },
-        CHILD_UPDATE: {
-          actions: "updateTrackInfo"
-        },
-        LOAD_TRACK_SUCCESS: {
-          actions: "uploadFinalization"
+        JOB_COMPLETE: {
+          actions: "receiveMetadata"
         }
       }
     },
@@ -30,7 +30,7 @@ const statechartsDef = {
       states: {
         empty: {
           on: {
-            LOAD_TRACK_SUCCESS: "ready"
+            JOB_COMPLETE: "ready"
           }
         },
         ready: {
@@ -40,6 +40,7 @@ const statechartsDef = {
               initial: "checkingAudioLoaded",
               on: {
                 SELECT_TRACK: {
+                  target: "playback",
                   actions: ["setSelectedTrack"]
                 }
               },
@@ -79,7 +80,7 @@ const statechartsDef = {
                   }
                 },
                 playable: {
-                  initial: "paused",
+                  initial: "attemptingPlay",
                   on: {
                     SEEK: {
                       actions: "seekTo"
@@ -231,24 +232,26 @@ const statechartsDef = {
 
 export const actionsAndServices = {
   actions: {
-    loadNewTrack: assign({
+    registerTrack: assign({
       tracks: (context, event) => {
         const { fileArray } = event.payload;
         const newTracks = fileArray
           .filter(e1 => !context.tracks.find(e2 => e2.id === e1.name))
           .map(fileRef => {
             const id = fileRef.name;
+            const proccess = spawn(metadataExtractor(fileRef));
             return {
-              childProcess: spawn(loadNewTrackService(fileRef, id)),
               id,
-              file: fileRef
+              file: fileRef,
+              childProcess: proccess,
+              loaded: false
             };
           });
         const result = context.tracks.concat(newTracks);
         return result;
       }
     }),
-    updateTrackInfo: assign({
+    receiveMetadata: assign({
       tracks: (context, event) => {
         const { payload } = event;
         const foundIndex = context.tracks.findIndex(
@@ -257,8 +260,10 @@ export const actionsAndServices = {
         if (foundIndex !== -1) {
           context.tracks.splice(foundIndex, 1, {
             ...context.tracks[foundIndex],
-            ...payload
+            ...payload,
+            loaded: true
           });
+          context.tracks[foundIndex].childProcess.stop();
           return context.tracks;
         } else {
           console.error(
@@ -375,6 +380,7 @@ export const actionsAndServices = {
     })
   },
   services: {
+    metadataExtractor,
     playAttempt: context => {
       return context.tracks[context.currentTrack].audioElem.play();
     },
@@ -408,8 +414,10 @@ export const actionsAndServices = {
         try {
           const src = URL.createObjectURL(tracks[currentTrack].file);
           const audioElem = new Audio(src);
+          console.log("Hi");
 
           audioElem.addEventListener("canplaythrough", () => {
+            console.log("Yo");
             resolve({
               audioElem,
               src

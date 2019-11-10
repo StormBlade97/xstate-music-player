@@ -5,6 +5,9 @@ module.exports = {
       .test(/\.worker\.js$/)
       .use("worker-loader")
       .loader("worker-loader")
+      .options({
+        inline: true
+      })
       .end();
   }
 };

@@ -3,13 +3,19 @@
     class="full-width track-item-root anchor fade-left is-clipped"
     @click="$emit('track-selected', index)"
   >
-    <div class="level-left track-info">
-      <TrackImg
-        :enableControl="canBePlayed"
-        :src="item.albumArt"
-        :isPlaying="isPlaying"
-        class="album-art"
-      />
+    <div
+      class="level-left track-info"
+      :class="isLoading && 'has-flicker-animation'"
+    >
+      <div>
+        <TrackImg
+          :enableControl="canBePlayed"
+          :src="item.albumArt"
+          :isPlaying="isPlaying"
+          class="album-art"
+        />
+      </div>
+
       <div
         class="track-name level-item anchor fade-right animation-on-hover"
         :class="isActive && 'has-text-gradient has-text-weight-medium'"
@@ -47,7 +53,8 @@ export default {
     index: Number,
     isPlaying: Boolean,
     isActive: Boolean,
-    canBePlayed: Boolean
+    canBePlayed: Boolean,
+    isLoading: Boolean
   },
   methods: {
     getTextDur: parseDuration

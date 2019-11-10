@@ -11,25 +11,55 @@
               <i class="bx bx-skip-previous bx-sm"></i>
             </span>
           </button>
-          <button
-            v-if="this.currentState.matches('main.ready.playback.playing')"
-            class="button is-medium is-borderless is-rounded has-background-gradient has-text-white"
-            @click="() => this.send('PAUSE')"
-          >
-            <span class="icon is-size-5">
-              <i class="bx bx-pause bx-md"></i>
-            </span>
-          </button>
-          <button
-            v-else
-            class="button is-medium is-borderless is-rounded has-background-gradient has-neon-shadow is-primary"
-            @click="() => this.send('PLAY')"
-          >
-            <span class="icon is-size-5">
-              <i class="bx bx-play bx-md"></i>
-            </span>
-          </button>
+          <div v-if="this.currentState.matches('main.ready.playback.playable')">
+            <button
+              v-if="
+                this.currentState.matches(
+                  'main.ready.playback.playable.playing'
+                )
+              "
+              class="button is-medium is-borderless is-rounded has-background-gradient has-neon-shadow has-text-white"
+              @click="() => this.send('PAUSE')"
+            >
+              <span class="icon is-size-5">
+                <i class="bx bx-pause bx-md"></i>
+              </span>
+            </button>
 
+            <button
+              v-else
+              class="button is-medium is-borderless is-rounded has-background-gradient has-neon-shadow is-primary"
+              @click="() => this.send('PLAY')"
+            >
+              <span class="icon is-size-5">
+                <i class="bx bx-play bx-md"></i>
+              </span>
+            </button>
+          </div>
+          <button
+            v-if="
+              this.currentState.matches('main.ready.playback.loadingAudioData')
+            "
+            class="button is-medium is-borderless is-rounded is-dark anchor is-clipped"
+          >
+            <div ckass="is-marginless">
+              <div
+                class="is-marginless is-overlay loading-swiper has-translation-animation"
+              ></div>
+              <span class="icon is-marginless">
+                <i class="bx bxs-hourglass"></i>
+              </span>
+            </div>
+          </button>
+          <button
+            v-if="this.currentState.matches('main.ready.playback.loadFailed')"
+            class="button is-medium is-borderless is-rounded is-danger is-primary"
+            @click="() => this.send('RETRY_LOAD_BINARY')"
+          >
+            <span class="icon is-size-5">
+              <i class="bx bx-redo"></i>
+            </span>
+          </button>
           <button
             class="button is-borderless is-transparent is-rounded"
             @click="() => this.send('NEXT')"
@@ -57,9 +87,6 @@
           </button>
           <button
             class="button is-borderless is-rounded is-transparent is-relative"
-            :class="{
-              'is-primary': currentState.matches('playback.playing.fastfwd')
-            }"
             @click="
               () => this.send({ type: 'SKIP_TEN', payload: { forward: true } })
             "
@@ -124,9 +151,12 @@ export default {
   flex-shrink: 1;
   flex-basis: 50%;
 }
-button {
+.button {
   border: none !important;
   outline: transparent !important;
   transition: all 0.5s;
+}
+.button:hover {
+  transform: scale(1.2);
 }
 </style>
