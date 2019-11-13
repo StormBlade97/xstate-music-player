@@ -60,30 +60,41 @@ async function authSpotify() {
   }
   console.error("All retries to auth failed. Aborting");
 }
-app.use("/search", async (req, res) => {
+app.use("/search", async (req, res, next) => {
   const { q } = req.query;
-  axios
-    .get(
-      `https://kgsearch.googleapis.com/v1/entities:search?query=${q}&key=${process.env.GOOGLE_API_KEY}&limit=1&indent=True`
-    )
-    .then(r => {
-      res.json(r.data);
-    })
-    .catch(() => res.send(500));
+  try {
+    const { body } = await spotifyApi.searchTracks(q);
+    const tracks = body.tracks.items;
+    if (tracks.length < 1) {
+      return res.status(404).json({
+        message: "No track found"
+      });
+    } else {
+      return res.json(
+        tracks.map(t => {
+          delete t.album.available_markets;
+          delete t.available_markets;
+          return t;
+        })
+      );
+    }
+  } catch (error) {
+    return next(error);
+  }
 });
 app.use(
   "/enrichment",
   async (request, response, next) => {
-    const { q } = request.query;
+    const { trackId } = request.query;
     try {
       let payload;
-      const { body } = await spotifyApi.searchTracks(q);
-      if (body.tracks.length < 1) {
+      const { body } = await spotifyApi.getTrack(trackId);
+      if (body.tracks.length) {
         return response.send(404).json({
-          msg: "No track found"
+          message: "No track found"
         });
       }
-      const { id, name, album, explicit } = body.tracks.items[0];
+      const { id, name, album, explicit } = body.tracks;
       const { images, artists, id: albumId } = album;
 
       payload = {

@@ -17,7 +17,7 @@
       </div>
 
       <div
-        class="track-name level-item anchor fade-right animation-on-hover"
+        class="track-name level-item anchor is-clipped fade-right animation-on-hover"
         :class="isActive && 'has-text-gradient has-text-weight-medium'"
       >
         <div class="full-width">
@@ -65,6 +65,7 @@ export default {
 @import "@/main.scss";
 .track-item-root {
   cursor: pointer;
+  padding: 0.5rem;
 }
 .album-art {
   width: 3rem;

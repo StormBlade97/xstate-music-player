@@ -29,6 +29,9 @@ body,
 .has-background-gradient {
   background: linear-gradient(120deg, $primary, $secondary) !important;
 }
+.has-background-transparent {
+  background-color: transparent !important;
+}
 .has-neon-shadow {
   box-shadow: 0 12px 24px rgba($primary, 25%), 0 4px 30px rgba($secondary, 15%);
 }
@@ -112,4 +115,10 @@ body,
 }
 .button.is-transparent {
   background-color: transparent !important;
+}
+.is-borderless {
+  border: none !important;
+}
+.has-radius-medium {
+  border-radius: $radius-medium !important;
 }

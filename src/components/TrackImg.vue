@@ -26,9 +26,8 @@
       @load="handleImgLoad"
       @error="handleImgError"
       :src="src"
-      alt
-      :v-if="src && loadStatus == LoadStateEnum.SUCCESS"
-      class="image is-overlay is-clipped has-fade-in-animation"
+      v-show="src && loadStatus === LoadStateEnum.SUCCESS"
+      class="image is-overlay is-clipped"
       key="ii"
       :class="(showHoverControl || isPlaying) && 'has-blur-animation'"
     />
@@ -97,6 +96,7 @@ export default {
     z-index: 3;
     object-fit: cover;
     height: 100%;
+    width: 100%;
   }
 }
 .centerize {

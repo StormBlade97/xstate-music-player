@@ -15,7 +15,6 @@ const store = new Vuex.Store({
   },
   mutations: {
     updateState(state, payload) {
-      console.log(state);
       state.currentState = payload;
     }
   }

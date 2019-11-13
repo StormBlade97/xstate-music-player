@@ -11,11 +11,23 @@
       </p>
       <p>Empower your musical experience with lyrics and knowledge.</p>
       <div class="ads-grid">
-        <div class="item is-boxed" :key="id" v-for="(item, id) in ads">
-          <div class="icon-art">
-            <span class="icon is-size-1">
-              <i class="bx" :class="`bx-${item.icon}`"></i>
-            </span>
+        <div
+          class="item is-boxed has-background-black"
+          :key="id"
+          :class="
+            adsEntered === id && 'has-neon-shadow has-background-gradient'
+          "
+          v-for="(item, id) in ads"
+          @mouseenter="handleMouseEnter(id)"
+          @mouseleave="handleMouseLeave"
+        >
+          <div
+            class="icon-art is-size-1"
+            :class="
+              adsEntered !== id ? 'has-text-gradient has-neon-shadow-text' : ''
+            "
+          >
+            <i class="bx" :class="`bx-${item.icon}`"></i>
           </div>
           <div>
             <p class="is-size-6 has-text-weight-semibold">{{ item.main }}</p>
@@ -32,6 +44,7 @@ export default {
   name: "EmptyIntroPage",
   data() {
     return {
+      adsEntered: null,
       ads: [
         {
           icon: "wifi-off",
@@ -50,11 +63,20 @@ export default {
         }
       ]
     };
+  },
+  methods: {
+    handleMouseEnter(i) {
+      this.adsEntered = i;
+    },
+    handleMouseLeave() {
+      this.adsEntered = null;
+    }
   }
 };
 </script>
 
 <style lang="scss">
+@import "@/main.scss";
 .empty-intro-container {
   margin-top: 6rem;
 }
@@ -82,13 +104,7 @@ export default {
 .is-boxed {
   border-radius: 4px;
   transition: all 0.3s ease;
-  box-shadow: 0px 0px 2px rgba(49, 49, 49, 0.25);
   border-radius: 1rem;
-
-  &:hover {
-    box-shadow: 0px 3px 12px rgba(255, 81, 162, 0.25),
-      0px 12px 24px rgb(69, 18, 250, 0.15);
-  }
 }
 .tagline-text {
   opacity: 0.76;

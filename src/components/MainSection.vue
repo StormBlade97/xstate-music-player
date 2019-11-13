@@ -11,13 +11,17 @@
             :style="{ backgroundImage: `url('${bannerUrl}')` }"
           ></div>
         </div>
-        <section class="section">
+        <section
+          class="section intro-page"
+          v-if="this.currentState.matches('main.empty')"
+        >
           <div class="container">
-            <EmptyIntroPage
-              data-test="empty-intro-page"
-              v-if="this.currentState.matches('main.empty')"
-            ></EmptyIntroPage>
-            <TrackInfo v-else />
+            <EmptyIntroPage data-test="empty-intro-page"></EmptyIntroPage>
+          </div>
+        </section>
+        <section class="section" v-else>
+          <div class="container is-fluid">
+            <TrackInfo />
           </div>
         </section>
       </div>
@@ -92,6 +96,7 @@ export default {
   position: absolute;
   width: 100%;
   height: 30%;
+  max-height: 20rem;
   top: 0;
   left: 0;
   z-index: 0;
@@ -119,5 +124,10 @@ export default {
   left: 0;
   bottom: 0;
   width: 100%;
+  z-index: 200;
+}
+.intro-page {
+  width: 100%;
+  height: 100%;
 }
 </style>

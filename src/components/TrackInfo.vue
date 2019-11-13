@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="track-info-root">
     <div class="level">
       <div class="level-left is-shrinkable is-flex-wrappable">
         <div class="anchor track-art-container">
@@ -16,14 +16,17 @@
           <p class="subtitle">
             {{ currentTrack.artist || "No artist information" }}
           </p>
-          <p class="enrichment-permission">
-            <button class="button is-rounded has-background-gradient">
-              <span>Enrich with spotify</span>
+          <div>
+            <button
+              class="button is-rounded has-background-gradient is-borderless"
+              @click="enrich"
+            >
+              <span>Enrich with Spotify</span>
               <span class="icon">
                 <i class="bx bxl-spotify bx-sm"></i>
               </span>
             </button>
-          </p>
+          </div>
           <div>
             <span class="tag is-danger" v-if="currentTrack.explicit">
               <span class="icon">
@@ -35,39 +38,33 @@
         </div>
       </div>
     </div>
+
     <div class="columns">
-      <div class="column"></div>
-      <div class="column"></div>
-    </div>
-    <div class="columns">
-      <div class="column is-two-fifths">
-        <div class="box is-shadowless track-info-widget">
-          <p class="title is-5">Track info</p>
-          <p class="subtitle is-6">From file metadata</p>
-          <div class="level" v-for="entry in commonMetadata" :key="entry[0]">
-            <div class="level-left">
-              <span
-                class="info-title is-capitalized has-text-weight-semibold"
-                >{{ entry[0] }}</span
-              >
-            </div>
-            <div class="level-right overflow-wrap: break-word;">
-              <span>{{ entry[1] }}</span>
-            </div>
-          </div>
-        </div>
+      <div class="column">
+        <SpotifyEnrichment />
       </div>
+      <div class="column is-two-third"></div>
     </div>
     <div class="column"></div>
   </div>
 </template>
 <script>
 import TrackImg from "@/components/TrackImg";
+import SpotifyEnrichment from "@/components/SpotifyEnrichment";
+
 import { isObject, isArray } from "util";
 export default {
   name: "TrackInfo",
   components: {
-    TrackImg
+    TrackImg,
+    SpotifyEnrichment
+  },
+  methods: {
+    enrich() {
+      this.send({
+        type: "GET_SPOTIFY_MATCH"
+      });
+    }
   },
   computed: {
     currentProgress() {
@@ -100,6 +97,9 @@ export default {
 </script>
 <style lang="scss" scoped>
 @import "@/main.scss";
+.track-info-root {
+  margin: 3rem;
+}
 .track-art-container {
   margin-right: 3rem;
   margin-bottom: 3rem;
@@ -115,9 +115,6 @@ export default {
   height: 15rem;
   transform: translateY(10%) scale(0.85);
   filter: blur(24px);
-}
-.lyric-box {
-  white-space: pre;
 }
 .track-title {
   overflow-wrap: break-word;

@@ -1,6 +1,7 @@
 import { Machine, interpret, assign, send, spawn } from "xstate";
 import metadataExtractor from "./services/metadataExtractor";
 import { bound, shuffleArray } from "@/util";
+import getEnrichmentMachine from "./services/enrichmentmachine";
 
 const statechartsDef = {
   id: "musicPlayer",
@@ -21,7 +22,27 @@ const statechartsDef = {
           actions: ["registerTrack"]
         },
         JOB_COMPLETE: {
-          actions: "receiveMetadata"
+          actions: ["receiveMetadata", "spawnEnrichmentService"]
+        }
+      }
+    },
+    enrichable: {
+      on: {
+        RECEIVE_MATCH_CONFIRMATION: {
+          actions: "receivedEnrichmentData"
+        },
+        RECEIVE_MATCH_DETAIL: {
+          actions: "receivedMatchDetailedData"
+        },
+        /* forward these events to child */
+        GET_SPOTIFY_MATCH: {
+          actions: "forwardEnrichmentEvent"
+        },
+        CONFIRM_MATCH: {
+          actions: "forwardEnrichmentEvent"
+        },
+        RETRY_FETCH_MATCH_DETAILS: {
+          actions: "forwardEnrichmentEvent"
         }
       }
     },
@@ -272,6 +293,30 @@ export const actionsAndServices = {
         }
       }
     }),
+    receivedEnrichmentData: assign({
+      tracks: context => {
+        const { tracks, currentTrack } = context;
+        const enrichmentChildStateContext =
+          tracks[currentTrack].enrichment.state.context;
+        const { matches, selected } = enrichmentChildStateContext;
+        const match = matches[selected];
+        delete match.duration;
+
+        tracks.splice(currentTrack, 1, {
+          ...tracks[currentTrack],
+          title: match.name,
+          spotifyId: match.id,
+          albumArt: match.album.images[0].url,
+          artist: match.album.artists.map(a => a.name).join(" & "),
+          album: match.album,
+          ...match
+        });
+        return tracks;
+      }
+    }),
+    forwardEnrichmentEvent: (context, event) => {
+      context.tracks[context.currentTrack].enrichment.send(event);
+    },
     updateLoadedBinary: assign({
       tracks: (context, event) => {
         const { tracks, currentTrack } = context;
@@ -283,18 +328,24 @@ export const actionsAndServices = {
         return b;
       }
     }),
-    uploadFinalization: (context, event) => {
-      const { id } = event.payload;
-      const target = context.tracks.find(elem => elem.id === id);
-      if (target) {
-        target.childProcess.stop();
-      } else {
-        console.error(`Failed to clean up track upload process`);
-      }
-    },
     setSelectedTrack: assign({
       currentTrack: (context, event) => {
         return event.payload.index;
+      }
+    }),
+    spawnEnrichmentService: assign({
+      tracks: (context, event) => {
+        const { tracks } = context;
+        const query =
+          event.payload.metadata && event.payload.metadata.common.title
+            ? `${event.payload.metadata.common.title} - ${event.payload.metadata.common.artist}`
+            : event.payload.id.split(".")[0].replace(/\([^()]*\)/g, "");
+        const index = tracks.findIndex(e => e.id === event.payload.id);
+        tracks.splice(index, 1, {
+          ...tracks[index],
+          enrichment: spawn(getEnrichmentMachine({ query }))
+        });
+        return tracks;
       }
     }),
     pauseTrack: context => {
@@ -404,7 +455,6 @@ export const actionsAndServices = {
       return () => {
         audioElem.removeEventListener("timeupdate", trackTimeCallback);
         audioElem.pause();
-        audioElem.currentTime = 0;
       };
     },
     loadBinaryData: context =>
@@ -414,10 +464,8 @@ export const actionsAndServices = {
         try {
           const src = URL.createObjectURL(tracks[currentTrack].file);
           const audioElem = new Audio(src);
-          console.log("Hi");
 
           audioElem.addEventListener("canplaythrough", () => {
-            console.log("Yo");
             resolve({
               audioElem,
               src

@@ -63,6 +63,7 @@ export default {
   },
   methods: {
     uploadFile(fileArray) {
+      console.log("Uploading track");
       this.send({
         type: "UPLOAD_TRACK",
         payload: {
