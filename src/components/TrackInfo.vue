@@ -1,7 +1,7 @@
 <template>
   <div class="track-info-root">
-    <div class="level">
-      <div class="level-left is-shrinkable is-flex-wrappable">
+    <div class="columns">
+      <div class="column is-narrow">
         <div class="anchor track-art-container">
           <div class="is-overlay">
             <TrackImg :src="imgSrc" class="track-art" />
@@ -10,31 +10,31 @@
             <TrackImg :src="imgSrc" class="track-art" />
           </div>
         </div>
+      </div>
 
-        <div class="track-title is-shrinkable">
-          <p class="title">{{ currentTrack.title || currentTrack.id }}</p>
-          <p class="subtitle">
-            {{ currentTrack.artist || "No artist information" }}
-          </p>
-          <div>
-            <button
-              class="button is-rounded has-background-gradient is-borderless"
-              @click="enrich"
-            >
-              <span>Enrich with Spotify</span>
-              <span class="icon">
-                <i class="bx bxl-spotify bx-sm"></i>
-              </span>
-            </button>
-          </div>
-          <div>
-            <span class="tag is-danger" v-if="currentTrack.explicit">
-              <span class="icon">
-                <i class="bx bxs-no-entry"></i>
-              </span>
-              <span>Explicit</span>
+      <div class="column track-title">
+        <p class="title">{{ currentTrack.title || currentTrack.id }}</p>
+        <p class="subtitle">
+          {{ currentTrack.artist || "No artist information" }}
+        </p>
+        <div>
+          <button
+            class="button is-rounded has-background-gradient is-borderless"
+            @click="enrich"
+          >
+            <span>Enrich with Spotify</span>
+            <span class="icon">
+              <i class="bx bxl-spotify bx-sm"></i>
             </span>
-          </div>
+          </button>
+        </div>
+        <div>
+          <span class="tag is-danger" v-if="currentTrack.explicit">
+            <span class="icon">
+              <i class="bx bxs-no-entry"></i>
+            </span>
+            <span>Explicit</span>
+          </span>
         </div>
       </div>
     </div>
@@ -101,8 +101,6 @@ export default {
   margin: 3rem;
 }
 .track-art-container {
-  margin-right: 3rem;
-  margin-bottom: 3rem;
 }
 .track-art {
   width: 15rem;
@@ -118,9 +116,7 @@ export default {
 }
 .track-title {
   overflow-wrap: break-word;
-  width: 50rem;
-  min-width: 30rem;
-  max-width: 60rem;
+  padding: 2rem;
 }
 
 .full-width {

@@ -33,6 +33,7 @@ function handleError(error, request, response) {
 /* getToken */
 async function authSpotify() {
   let retryLeft = 1;
+  console.log("Authing");
   const { CLIENT_ID, CLIENT_SECRET } = process.env;
   const token = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString("base64");
   while (retryLeft > 0) {

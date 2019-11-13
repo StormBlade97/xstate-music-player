@@ -11,97 +11,69 @@ export const definition = {
     selected: null,
     selectedDetail: null
   },
-  type: "parallel",
+  initial: "searchingMatches",
   states: {
-    retrieveMatches: {
-      initial: "searchingMatches",
-      states: {
-        resolved: {
-          on: {
-            GET_SPOTIFY_MATCH: {
-              target: "searchingMatches",
-              actions: "saveQuery"
-            }
-          },
-          states: {
-            confirmable: {
-              on: {
-                CONFIRM_MATCH: {
-                  target: "confirmed",
-                  actions: ["saveSelection"]
-                }
-              }
-            },
-            failed: {
-              on: {}
-            },
-            confirmed: {
-              entry: ["notifyMatchConfirmation"]
-            }
-          }
+    on: {
+      GET_SPOTIFY_MATCH: {
+        target: "searchingMatches",
+        actions: "saveQuery"
+      }
+    },
+    searchingMatches: {
+      invoke: {
+        id: "h",
+        src: "fetchSpotifyTrackService",
+        onDone: {
+          target: "confirmable",
+          actions: "saveResponse"
         },
-        searchingMatches: {
-          invoke: {
-            id: "h",
-            src: "fetchSpotifyTrackService",
-            onDone: {
-              target: "resolved.confirmable",
-              actions: "saveResponse"
-            },
-            onError: {
-              target: "resolved.failed",
-              actions: "logError"
-            }
-          }
+        onError: {
+          target: "searchMatchesFailed",
+          actions: "logError"
         }
       }
     },
-    matchDetailedData: {
-      initial: "idle",
-      states: {
-        idle: {
-          on: {
-            CONFIRM_MATCH: "fetchable"
-          }
-        },
-        fetchable: {
-          initial: "fetchingMatchDetails",
-
-          on: {
-            CONFIRM_MATCH: {
-              target: "fetchable",
-              internal: false
-            }
-          },
-          states: {
-            fetchingMatchDetails: {
-              after: {
-                5000: "failed"
-              },
-              invoke: {
-                src: "fetchMoreTrackInfo",
-                onDone: {
-                  target: "done",
-                  actions: "saveMatchDetails"
-                },
-                onError: {
-                  target: "failed"
-                }
-              }
-            },
-            failed: {
-              on: {
-                RETRY_FETCH_MATCH_DETAILS: {
-                  target: "fetchingMatchDetails"
-                }
-              }
-            },
-            done: {
-              entry: "notifyMatchDetailReceived"
-            }
-          }
+    confirmable: {
+      on: {
+        CONFIRM_MATCH: {
+          target: "confirmed",
+          actions: ["saveSelection"]
         }
       }
+    },
+    searchMatchesFailed: {
+      on: {}
+    },
+    confirmed: {
+      entry: ["notifyMatchConfirmation"],
+      after: {
+        1000: "fetchingMatchDetails"
+      }
+    },
+    fetchingMatchDetails: {
+      after: {
+        5000: "fetchMatchDetailsFailed"
+      },
+      invoke: {
+        src: "fetchMoreTrackInfo",
+        onDone: {
+          target: "fetchMatchDetailsDone",
+          actions: "saveMatchDetails"
+        },
+        onError: {
+          target: "fetchMatchDetailsFailed"
+        }
+      }
+    },
+    fetchMatchDetailsFailed: {
+      on: {
+        RETRY_FETCH_MATCH_DETAILS: {
+          target: "fetchingMatchDetails"
+        }
+      }
+    },
+    fetchMatchDetailsDone: {
+      entry: "notifyMatchDetailReceived"
     }
   }
 };

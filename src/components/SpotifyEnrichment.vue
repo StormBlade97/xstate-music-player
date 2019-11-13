@@ -3,10 +3,8 @@
     <div
       class="is-fullwidth"
       v-if="
-        enrichmentState.matches('retrieveMatches.searchingMatches') ||
-          enrichmentState.matches(
-            'matchDetailedData.fetchable.fetchingMatchDetails'
-          )
+        enrichmentState.matches('searchingMatches') ||
+          enrichmentState.matches('fetchingMatchDetails')
       "
     >
       <progress class="progress progress-bar is-primary"></progress>
@@ -35,17 +33,13 @@
       </div>
 
       <div class="columns">
-        <div class="column is-two-fifths">
-          <div
-            v-if="enrichmentState.matches('retrieveMatches.searchingMatches')"
-          >
+        <div class="column">
+          <div v-if="enrichmentState.matches('searchingMatches')">
             <p class="title is-4">Working on it</p>
             <p class="subtitle is-5">Getting you a match for</p>
             <p class="title is-5">{{ enrichmentState.context.query }}</p>
           </div>
-          <div
-            v-if="enrichmentState.matches('retrieveMatches.resolved.failed')"
-          >
+          <div v-if="enrichmentState.matches('searchMatchesFailed')">
             <p class="title">Oh no!</p>
             <p class="subtitle is-6 has-text-danger">
               Some thing went wrong with the network. Try again soon
@@ -57,11 +51,7 @@
               Try again
             </button>
           </div>
-          <div
-            v-if="
-              enrichmentState.matches('retrieveMatches.resolved.confirmable')
-            "
-          >
+          <div v-if="enrichmentState.matches('confirmable')">
             <p class="title is-4">This could be it</p>
             <div class="level">
               <TrackImg
@@ -87,13 +77,7 @@
               Confirm
             </button>
           </div>
-          <div
-            v-if="
-              enrichmentState.matches(
-                'matchDetailedData.fetchable.fetchingMatchDetails'
-              )
-            "
-          >
+          <div v-if="enrichmentState.matches('fetchingMatchDetails')">
             <p class="title is-4">A little more</p>
             <p class="subtitle is-6">
               Getting more information about the track, such as audio feature,
@@ -116,9 +100,7 @@
               }}
             </p>
           </div>
-          <div
-            v-if="enrichmentState.matches('matchDetailedData.fetchable.failed')"
-          >
+          <div v-if="enrichmentState.matches('fetchMatchDetailsFailed')">
             <p class="title">Could not load it :(</p>
             <p class="subtitle is-6 has-text-danger">
               For some reason, could not load more information about this track.
@@ -131,16 +113,11 @@
               Try again
             </button>
           </div>
-          <div
-            v-if="enrichmentState.matches('matchDetailedData.fetchable.done')"
-          >
+          <div v-if="enrichmentState.matches('fetchMatchDetailsFailed')">
             <p class="title is-4">All done, enjoy your music!</p>
           </div>
         </div>
-        <div
-          class="column"
-          v-if="enrichmentState.matches('retrieveMatches.resolved.confirmable')"
-        >
+        <div class="column" v-if="enrichmentState.matches('confirmable')">
           <div class="anchor scrollbox">
             <TrackItem
               v-for="(item, index) in matches"
@@ -165,17 +142,12 @@ export default {
     TrackImg,
     TrackItem
   },
-  data() {
-    return {
-      customSearch: ""
-    };
-  },
+
   methods: {
     enrich() {
       this.send("GET_SPOTIFY_MATCH");
     },
     manualSearch(e) {
-      console.log("Inputting", e.target.value);
       this.send({
         type: "GET_SPOTIFY_MATCH",
         payload: {
