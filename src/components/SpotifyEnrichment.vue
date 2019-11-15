@@ -1,5 +1,8 @@
 <template>
-  <div class="is-fullwidth has-fade-in-animation anchor" v-if="enrichmentState">
+  <div
+    class="is-fullwidth has-fade-in-animation is-clipped anchor"
+    v-if="enrichmentState"
+  >
     <div
       class="is-fullwidth"
       v-if="
@@ -7,10 +10,15 @@
           enrichmentState.matches('fetchingMatchDetails')
       "
     >
-      <progress class="progress progress-bar is-primary"></progress>
+      <progress
+        class="has-fade-in-animation progress progress-bar is-primary"
+      ></progress>
     </div>
-    <div class="box track-match-container">
-      <div class="columns widget-name is-vcentered">
+    <div class="box track-match-container has-min-height">
+      <div
+        class="columns widget-section is-vcentered"
+        v-if="!enrichmentState.matches('fetchMatchDetailsDone')"
+      >
         <div class="column is-narrow">
           <p class="title is-5">Connect with Spotify</p>
         </div>
@@ -19,7 +27,10 @@
           <div
             class="control is-expanded has-icons-left has-background-black has-radius-medium"
           >
-            <span class="icon is-left">
+            <span
+              class="icon is-left"
+              :class="emptyMatches && 'has-beat-animation'"
+            >
               <i class="bx bx-search"></i>
             </span>
             <input
@@ -32,11 +43,13 @@
         </div>
       </div>
 
-      <div class="columns">
+      <div class="columns main-section">
         <div class="column">
           <div v-if="enrichmentState.matches('searchingMatches')">
-            <p class="title is-4">Working on it</p>
-            <p class="subtitle is-5">Getting you a match for</p>
+            <div class="mb">
+              <p class="title is-4">Working on it</p>
+              <p class="subtitle is-6">Getting you a match for</p>
+            </div>
             <p class="title is-5">{{ enrichmentState.context.query }}</p>
           </div>
           <div v-if="enrichmentState.matches('searchMatchesFailed')">
@@ -52,53 +65,49 @@
             </button>
           </div>
           <div v-if="enrichmentState.matches('confirmable')">
-            <p class="title is-4">This could be it</p>
-            <div class="level">
-              <TrackImg
-                class="track-img"
-                :src="enrichmentState.context.matches[0].album.images[0].url"
-              />
-            </div>
+            <div v-if="matches.length > 0">
+              <p class="title is-4">This could be it</p>
+              <div class="mb">
+                <VerticalTrackItem
+                  :albumArt="matches[0].albumArt"
+                  :title="matches[0].title"
+                  :artist="matches[0].artist"
+                  :albumName="matches[0].albumName"
+                />
+              </div>
 
-            <p class="title is-5">
-              {{ enrichmentState.context.matches[0].name }}
-            </p>
-            <p class="subtitle is-6">
-              {{
-                enrichmentState.context.matches[0].album.artists
-                  .map(a => a.name)
-                  .join(" & ")
-              }}
-            </p>
-            <button
-              class="button is-rounded has-background-gradient"
-              @click="confirmMatch(0)"
-            >
-              Confirm
-            </button>
+              <button
+                class="button is-rounded has-background-gradient"
+                @click="confirmMatch(0)"
+              >
+                Confirm
+              </button>
+            </div>
+            <div v-else>
+              <p class="title">Nothing was found</p>
+              <p>I could not get a match with Spotify based on this</p>
+              <p class="title is-6">{{ enrichmentState.context.query }}</p>
+              <p>You can try to manually search with the text box above</p>
+            </div>
           </div>
-          <div v-if="enrichmentState.matches('fetchingMatchDetails')">
+          <div
+            v-if="
+              enrichmentState.matches('fetchingMatchDetails') ||
+                enrichmentState.matches('confirmed')
+            "
+          >
             <p class="title is-4">A little more</p>
             <p class="subtitle is-6">
               Getting more information about the track, such as audio feature,
               etc
             </p>
-            <div class="level">
-              <TrackImg
-                class="track-img"
-                :src="enrichmentState.context.matches[0].album.images[0].url"
-              />
-            </div>
-            <p class="title is-5">
-              {{ enrichmentState.context.matches[0].name }}
-            </p>
-            <p class="subtitle is-6">
-              {{
-                enrichmentState.context.matches[0].album.artists
-                  .map(a => a.name)
-                  .join(" & ")
-              }}
-            </p>
+
+            <VerticalTrackItem
+              :albumArt="selectedMatch.album.images[0].url"
+              :title="selectedMatch.name"
+              :artist="selectedMatch.artistString"
+              :albumName="selectedMatch.album.name"
+            />
           </div>
           <div v-if="enrichmentState.matches('fetchMatchDetailsFailed')">
             <p class="title">Could not load it :(</p>
@@ -113,20 +122,40 @@
               Try again
             </button>
           </div>
-          <div v-if="enrichmentState.matches('fetchMatchDetailsFailed')">
-            <p class="title is-4">All done, enjoy your music!</p>
+          <div v-if="enrichmentState.matches('fetchMatchDetailsDone')">
+            <div
+              class="is-overlay done-bg has-radius-medium is-flex-centerized"
+            >
+              <div>
+                <div class="field is-grouped is-grouped-multiline">
+                  <span class="title is-6 control">Enriched with</span>
+                  <span class="icon is-size-4 is-dark control">
+                    <i class="bx bxl-spotify"></i>
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <div class="column" v-if="enrichmentState.matches('confirmable')">
-          <div class="anchor scrollbox">
+          <div class="anchor scrollbox" v-if="matches.length > 1">
             <TrackItem
               v-for="(item, index) in matches"
               :key="index"
               :item="item"
               :index="index"
+              :explicit="item.explicit"
               class="track-item"
               @track-selected="confirmMatch(index)"
             />
+          </div>
+          <div class="empty-matches is-flex-centerized is-fullheight" v-else>
+            <p class="empty-icon">
+              <span class="icon is-size-1">
+                <i class="bx bx-music"></i>
+              </span>
+            </p>
+            <p>Search results are here</p>
           </div>
         </div>
       </div>
@@ -135,23 +164,28 @@
 </template>
 
 <script>
-import TrackImg from "@/components/TrackImg.vue";
 import TrackItem from "@/components/TrackItem.vue";
+import VerticalTrackItem from "@/components/VerticalTrackItem.vue";
 export default {
   components: {
-    TrackImg,
-    TrackItem
+    TrackItem,
+    VerticalTrackItem
   },
 
   methods: {
-    enrich() {
-      this.send("GET_SPOTIFY_MATCH");
-    },
     manualSearch(e) {
       this.send({
         type: "GET_SPOTIFY_MATCH",
         payload: {
           query: e.target.value
+        }
+      });
+    },
+    refetchMatches() {
+      this.send({
+        type: "GET_SPOTIFY_MATCH",
+        payload: {
+          query: this.enrichmentState.context.query
         }
       });
     },
@@ -162,9 +196,6 @@ export default {
           index: pos
         }
       });
-    },
-    refetchMatches() {
-      this.send("RETRY_GET_MATCH");
     },
     retryFetchMatchDetails() {
       this.send("RETRY_FETCH_MATCH_DETAILS");
@@ -180,17 +211,26 @@ export default {
       }
     },
     matches() {
-      return this.enrichmentState
-        ? this.enrichmentState.context.matches
-            .map(item => ({
-              title: item.name,
-              albumArt: item.album.images[0].url,
-              duration: item.duration_ms / 1000,
-              artist: item.album.artists.map(a => a.name).join(" & "),
-              explicit: item.explicit
-            }))
-            .filter((_, i) => i < 5)
-        : [];
+      return this.enrichmentState.context.matches
+        .map(item => ({
+          title: item.name,
+          albumArt: item.album.images[0].url,
+          duration: item.duration_ms / 1000,
+          artist: item.artistString,
+          explicit: item.explicit,
+          albumName: item.album.name
+        }))
+        .filter((_, i) => i < 5);
+    },
+    emptyMatches() {
+      return (
+        this.enrichmentState.matches("confirmable") && this.matches.length < 1
+      );
+    },
+    selectedMatch() {
+      return this.enrichmentState.context.matches[
+        this.enrichmentState.context.selected
+      ];
     }
   }
 };
@@ -204,9 +244,14 @@ export default {
 .is-fullwidth {
   width: 100%;
 }
+.is-fullheight {
+  height: 100%;
+}
+.has-min-height {
+  min-height: 25rem;
+}
 .track-match-container {
   background-color: $bg-sidebar;
-  min-height: 30rem;
   & > * {
     margin: 1rem;
   }
@@ -215,10 +260,7 @@ export default {
   display: flex;
   flex-direction: column;
 }
-.track-img {
-  width: 10rem;
-  height: 10rem;
-}
+
 .is-scrollable {
   overflow-y: auto;
 }
@@ -231,10 +273,25 @@ export default {
   top: 0;
   left: 0;
 }
-.widget-name {
+.widget-section {
   margin-top: -0.25rem;
+}
+.main-section {
+  min-height: 100%;
+}
+.empty-matches {
+  color: rgba(255, 255, 255, 0.1);
+}
+.is-flex-centerized {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 .custom-input {
   background-color: white !important;
+}
+.mb {
+  margin-bottom: 1rem;
 }
 </style>

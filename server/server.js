@@ -14,6 +14,7 @@ let spotifyApi = new SpotifyWebApi({
 });
 
 function handleError(error, request, response) {
+  console.log(error);
   if (error.response) {
     // The request was made and the server responded with a status code
     // that falls out of the range of 2xx
@@ -32,53 +33,44 @@ function handleError(error, request, response) {
 
 /* getToken */
 async function authSpotify() {
-  let retryLeft = 1;
-  console.log("Authing");
   const { CLIENT_ID, CLIENT_SECRET } = process.env;
   const token = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString("base64");
-  while (retryLeft > 0) {
-    try {
-      const { data } = await axios({
-        url: `https://accounts.spotify.com/api/token?grant_type=client_credentials`,
-        method: "POST",
-        headers: {
-          Authorization: `Basic ${token}`,
-          "Content-Type": "application/x-www-form-urlencoded"
-        }
-      });
-
-      access_token = data.access_token;
-      expires_in = data.expires_in;
-      spotifyApi.setAccessToken(access_token);
-      setTimeout(authSpotify, expires_in * 1000);
-    } catch (error) {
-      console.error(error.response);
-      retryLeft--;
-    }
-    await new Promise(resolve => {
-      setTimeout(resolve, 20000);
+  try {
+    const { data } = await axios({
+      url: `https://accounts.spotify.com/api/token?grant_type=client_credentials`,
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${token}`,
+        "Content-Type": "application/x-www-form-urlencoded"
+      }
     });
+
+    access_token = data.access_token;
+    expires_in = data.expires_in;
+    spotifyApi.setAccessToken(access_token);
+    console.log("Authentication successful");
+    setTimeout(authSpotify, expires_in * 1000);
+  } catch (error) {
+    console.error(error.response);
+    setTimeout(authSpotify, 5000);
   }
-  console.error("All retries to auth failed. Aborting");
 }
 app.use("/search", async (req, res, next) => {
   const { q } = req.query;
   try {
     const { body } = await spotifyApi.searchTracks(q);
     const tracks = body.tracks.items;
-    if (tracks.length < 1) {
-      return res.status(404).json({
-        message: "No track found"
-      });
-    } else {
-      return res.json(
-        tracks.map(t => {
-          delete t.album.available_markets;
-          delete t.available_markets;
-          return t;
-        })
-      );
-    }
+
+    return res.json(
+      tracks.map(t => {
+        t.spotifyId = t.id;
+        delete t.id;
+        delete t.album.available_markets;
+        delete t.available_markets;
+        t.artistString = t.album.artists.map(a => a.name).join(" & ");
+        return t;
+      })
+    );
   } catch (error) {
     return next(error);
   }
@@ -88,36 +80,25 @@ app.use(
   async (request, response, next) => {
     const { trackId } = request.query;
     try {
-      let payload;
-      const { body } = await spotifyApi.getTrack(trackId);
-      if (body.tracks.length) {
-        return response.send(404).json({
-          message: "No track found"
-        });
-      }
-      const { id, name, album, explicit } = body.tracks;
-      const { images, artists, id: albumId } = album;
-
-      payload = {
-        id,
-        albumArt: images[0].url,
-        artist: artists[0].name,
-        title: name,
-        explicit
-      };
-
+      const { body: track } = await spotifyApi.getTrack(trackId);
       const [
         { body: albumRsp },
         { body: trackAnalysisRsp }
       ] = await Promise.all([
-        spotifyApi.getAlbumTracks(albumId),
-        spotifyApi.getAudioFeaturesForTrack(id)
+        spotifyApi.getAlbumTracks(track.album.id),
+        spotifyApi.getAudioFeaturesForTrack(trackId)
       ]);
-      payload.album = {
-        id: albumId,
-        tracks: albumRsp.items
+
+      const payload = {
+        ...track,
+        audioFeature: trackAnalysisRsp
       };
-      payload.audioFeature = trackAnalysisRsp;
+      payload.album = {
+        ...track.album,
+        ...albumRsp
+      };
+      payload.spotifyId = payload.id;
+      delete payload.id;
       response.status(200).json(payload);
     } catch (error) {
       next(error);

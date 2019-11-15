@@ -1,6 +1,6 @@
 <template>
   <div class="track-info-root">
-    <div class="columns">
+    <div class="columns is-vcentered">
       <div class="column is-narrow">
         <div class="anchor track-art-container">
           <div class="is-overlay">
@@ -17,53 +17,79 @@
         <p class="subtitle">
           {{ currentTrack.artist || "No artist information" }}
         </p>
-        <div>
-          <button
-            class="button is-rounded has-background-gradient is-borderless"
-            @click="enrich"
-          >
-            <span>Enrich with Spotify</span>
-            <span class="icon">
-              <i class="bx bxl-spotify bx-sm"></i>
-            </span>
-          </button>
-        </div>
-        <div>
-          <span class="tag is-danger" v-if="currentTrack.explicit">
-            <span class="icon">
-              <i class="bx bxs-no-entry"></i>
-            </span>
-            <span>Explicit</span>
-          </span>
+        <p
+          class="subtitle is-5"
+          v-if="currentTrack.album && currentTrack.album.name"
+        >
+          {{ currentTrack.album.name }}
+        </p>
+        <div class="level">
+          <div class="level-left">
+            <div class="level-item" v-if="currentTrack.explicit">
+              <span
+                class="level-item tag is-black is-rounded is-medium has-text-danger"
+              >
+                <span class="icon">
+                  <i class="bx bxs-no-entry bx-xs"></i>
+                </span>
+                <span class="has-text-weight-semibold">Explicit</span>
+              </span>
+            </div>
+            <div class="level-item">
+              <button
+                class="button is-rounded done-bg is-borderless has-text-dark"
+                v-if="currentTrack.enriched"
+                @click="enrich"
+              >
+                <span class="icon">
+                  <i class="bx bxl-spotify bx-sm"></i>
+                </span>
+                <span>Get a different match</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-
-    <div class="columns">
-      <div class="column">
-        <SpotifyEnrichment />
+    <section
+      class="section"
+      v-if="
+        currentTrack.enrichment &&
+          !currentTrack.enrichment.state.matches('fetchMatchDetailsDone')
+      "
+    >
+      <SpotifyEnrichment />
+    </section>
+    <section class="section">
+      <div class="columns">
+        <div class="column" v-if="currentTrack.audioFeature">
+          <AudioFeature />
+        </div>
+        <div class="column" v-if="currentTrack.album">
+          <AlbumInfo />
+        </div>
       </div>
-      <div class="column is-two-third"></div>
-    </div>
-    <div class="column"></div>
+    </section>
   </div>
 </template>
 <script>
 import TrackImg from "@/components/TrackImg";
 import SpotifyEnrichment from "@/components/SpotifyEnrichment";
+import AudioFeature from "@/components/AudioFeature";
+import AlbumInfo from "@/components/AlbumInfo";
 
 import { isObject, isArray } from "util";
 export default {
   name: "TrackInfo",
   components: {
     TrackImg,
-    SpotifyEnrichment
+    SpotifyEnrichment,
+    AudioFeature,
+    AlbumInfo
   },
   methods: {
     enrich() {
-      this.send({
-        type: "GET_SPOTIFY_MATCH"
-      });
+      this.send("RESTART_ENRICHMENT");
     }
   },
   computed: {
@@ -99,9 +125,13 @@ export default {
 @import "@/main.scss";
 .track-info-root {
   margin: 3rem;
+
+  .section {
+    padding-left: 0;
+    padding-right: 0;
+  }
 }
-.track-art-container {
-}
+
 .track-art {
   width: 15rem;
   height: 15rem;
@@ -112,7 +142,7 @@ export default {
   width: 15rem;
   height: 15rem;
   transform: translateY(10%) scale(0.85);
-  filter: blur(24px);
+  filter: blur(12px);
 }
 .track-title {
   overflow-wrap: break-word;
@@ -121,5 +151,16 @@ export default {
 
 .full-width {
   width: 100%;
+}
+.done-bg {
+  padding: 1rem;
+  background-image: linear-gradient(
+    135deg,
+    #81fbb8 10%,
+    #28c76f 100%
+  ) !important;
+}
+.mb {
+  margin-bottom: 1rem;
 }
 </style>

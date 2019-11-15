@@ -7,7 +7,7 @@
       </div>
       <div class="body">
         <TrackList v-if="hasTracks"></TrackList>
-        <div v-else data-test="sidebar-empty-intro">
+        <div v-else data-test="sidebar-empty-intro" class="sidebar-empty-intro">
           <div class="text-box">
             <p class="title is-3">Hi there</p>
             <p class="subtitle is-5">This your playlist space</p>
@@ -81,6 +81,9 @@ export default {
 </script>
 <style lang="scss">
 @import "@/main.scss";
+.sidebar-empty-intro {
+  margin: 1rem;
+}
 .upper {
   flex-grow: 2;
   display: flex;

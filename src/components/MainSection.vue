@@ -20,7 +20,7 @@
           </div>
         </section>
         <section class="section" v-else>
-          <div class="container is-fluid">
+          <div class="container">
             <TrackInfo />
           </div>
         </section>
@@ -49,7 +49,7 @@ export default {
   computed: {
     bannerUrl() {
       const defaultImg =
-        "https://images.unsplash.com/photo-1558725175-a40cb9f94824?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80";
+        "https://images.unsplash.com/photo-1533693706533-57740e69765d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1950&q=80";
       if (this.currentState.matches("main.ready")) {
         const { tracks, currentTrack } = this.currentState.context;
         const trackImg = tracks[currentTrack].albumArt;

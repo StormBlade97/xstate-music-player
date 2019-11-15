@@ -10,6 +10,7 @@
       :isLoading="!item.loaded"
       :index="index"
       :canBePlayed="true"
+      :explicit="item.explicit"
       @track-selected="selectTrack"
     />
   </div>

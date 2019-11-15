@@ -3,7 +3,7 @@ import axios from "axios";
 export const definition = {
   id: "enrichmentMachine",
   context: {
-    trackId: "",
+    id: "",
     query: "",
     matches: [],
     errorMessage: null,
@@ -12,13 +12,16 @@ export const definition = {
     selectedDetail: null
   },
   initial: "searchingMatches",
-  states: {
-    on: {
-      GET_SPOTIFY_MATCH: {
-        target: "searchingMatches",
-        actions: "saveQuery"
-      }
+  on: {
+    GET_SPOTIFY_MATCH: {
+      target: "searchingMatches",
+      actions: "saveQuery"
     },
+    RESTART_ENRICHMENT: {
+      target: "searchingMatches"
+    }
+  },
+  states: {
     searchingMatches: {
       invoke: {
         id: "h",
@@ -36,29 +39,30 @@ export const definition = {
     confirmable: {
       on: {
         CONFIRM_MATCH: {
-          target: "confirmed",
-          actions: ["saveSelection"]
+          target: "fetchingMatchDetails",
+          actions: ["saveSelection", "notifyMatchConfirmation"]
         }
       }
     },
     searchMatchesFailed: {
       on: {}
     },
-    confirmed: {
-      entry: ["notifyMatchConfirmation"],
-      after: {
-        1000: "fetchingMatchDetails"
-      }
-    },
+    // confirmed: {
+    //   entry: ["notifyMatchConfirmation"],
+    //   after: {
+    //     1000: "fetchingMatchDetails"
+    //   }
+    // },
     fetchingMatchDetails: {
       after: {
         5000: "fetchMatchDetailsFailed"
       },
       invoke: {
+        id: "s",
         src: "fetchMoreTrackInfo",
         onDone: {
           target: "fetchMatchDetailsDone",
-          actions: "saveMatchDetails"
+          actions: ["saveMatchDetails"]
         },
         onError: {
           target: "fetchMatchDetailsFailed"
@@ -85,7 +89,7 @@ const servicesAndActions = {
   },
   actions: {
     saveQuery: assign({
-      query: (context, event) => event.payload.query.trim()
+      query: (context, event) => event.payload.query
     }),
     saveResponse: assign({
       matches: (context, event) => event.data.data
@@ -105,15 +109,27 @@ const servicesAndActions = {
     saveMatchDetails: assign({
       selectedDetail: (c, event) => event.data.data
     }),
-    notifyMatchConfirmation: sendParent("RECEIVE_MATCH_CONFIRMATION"),
-    notifyMatchDetailReceived: sendParent("RECEIVE_MATCH_DETAIL")
+    notifyMatchConfirmation: sendParent(context => ({
+      type: "RECEIVE_MATCH_CONFIRMATION",
+      payload: {
+        context
+      }
+    })),
+    notifyMatchDetailReceived: sendParent(context => ({
+      type: "RECEIVE_MATCH_DETAIL",
+      payload: {
+        context
+      }
+    }))
   },
   services: {
     fetchSpotifyTrackService: context =>
       axios.get(`/search?q=${context.query}`),
-    fetchMoreTrackInfo: context => {
-      console.log(context.matches.map(m => m.name), context.selected);
-      axios.get(`/enrichment?q=${context.matches[context.selected].id}`);
+    fetchMoreTrackInfo: async context => {
+      const s = await axios.get(
+        `/enrichment?trackId=${context.matches[context.selected].spotifyId}`
+      );
+      return s;
     }
   }
 };

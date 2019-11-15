@@ -19,10 +19,8 @@ body,
   height: 100%;
 }
 
-/* global override */
-
 .has-text-gradient {
-  background: linear-gradient(120deg, $primary, $secondary);
+  background-image: linear-gradient(120deg, $primary, $secondary);
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }

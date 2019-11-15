@@ -34,8 +34,15 @@
         </div>
       </div>
     </div>
-    <div class="track-duration">
-      <p>{{ getTextDur(item.duration) }}</p>
+    <div class="track-right">
+      <div class="field is-grouped">
+        <strong class="control is-size-6 has-text-danger" v-if="explicit">
+          <span class="icon">
+            <i class="bx bxs-no-entry"></i>
+          </span>
+        </strong>
+        <p>{{ getTextDur(item.duration) }}</p>
+      </div>
     </div>
   </div>
 </template>
@@ -54,7 +61,8 @@ export default {
     isPlaying: Boolean,
     isActive: Boolean,
     canBePlayed: Boolean,
-    isLoading: Boolean
+    isLoading: Boolean,
+    explicit: Boolean
   },
   methods: {
     getTextDur: parseDuration
@@ -80,7 +88,7 @@ export default {
     padding-left: 1rem;
   }
 }
-.track-duration {
+.track-right {
   position: absolute;
   right: 0;
   top: 50%;

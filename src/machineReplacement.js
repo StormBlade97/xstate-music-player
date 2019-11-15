@@ -38,6 +38,9 @@ const statechartsDef = {
         GET_SPOTIFY_MATCH: {
           actions: "forwardEnrichmentEvent"
         },
+        RESTART_ENRICHMENT: {
+          actions: "forwardEnrichmentEvent"
+        },
         CONFIRM_MATCH: {
           actions: "forwardEnrichmentEvent"
         },
@@ -294,23 +297,44 @@ export const actionsAndServices = {
       }
     }),
     receivedEnrichmentData: assign({
-      tracks: context => {
-        const { tracks, currentTrack } = context;
-        const enrichmentChildStateContext =
-          tracks[currentTrack].enrichment.state.context;
-        const { matches, selected } = enrichmentChildStateContext;
+      tracks: (context, event) => {
+        const { tracks } = context;
+        const { matches, selected, id } = event.payload.context;
         const match = matches[selected];
         delete match.duration;
 
-        tracks.splice(currentTrack, 1, {
-          ...tracks[currentTrack],
-          title: match.name,
-          spotifyId: match.id,
-          albumArt: match.album.images[0].url,
-          artist: match.album.artists.map(a => a.name).join(" & "),
-          album: match.album,
-          ...match
-        });
+        const trackIndex = tracks.findIndex(track => track.id === id);
+        if (trackIndex > -1) {
+          tracks.splice(trackIndex, 1, {
+            ...tracks[trackIndex],
+            title: match.name,
+            spotifyId: match.id,
+            albumArt: match.album.images[0].url,
+            artist: match.album.artists.map(a => a.name).join(" & "),
+            album: match.album,
+            enriched: true,
+            ...match
+          });
+        } else {
+          console.error("Failed to update metadata for track ", id);
+        }
+        return tracks;
+      }
+    }),
+    receivedMatchDetailedData: assign({
+      tracks: (context, event) => {
+        const { tracks } = context;
+        const { selectedDetail, id } = event.payload.context;
+        const trackIndex = tracks.findIndex(track => track.id === id);
+        if (trackIndex > -1) {
+          tracks.splice(trackIndex, 1, {
+            ...tracks[trackIndex],
+            ...selectedDetail
+          });
+        } else {
+          console.error("Failed to update metadata for track ", id);
+        }
+
         return tracks;
       }
     }),
@@ -343,7 +367,9 @@ export const actionsAndServices = {
         const index = tracks.findIndex(e => e.id === event.payload.id);
         tracks.splice(index, 1, {
           ...tracks[index],
-          enrichment: spawn(getEnrichmentMachine({ query }))
+          enrichment: spawn(
+            getEnrichmentMachine({ query, id: event.payload.id })
+          )
         });
         return tracks;
       }
