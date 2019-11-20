@@ -4,6 +4,7 @@ const app = express();
 const proxy = require("http-proxy-middleware");
 const SpotifyWebApi = require("spotify-web-api-node");
 const axios = require("axios");
+const path = require("path");
 
 let access_token = null;
 let expires_in = null;
@@ -16,17 +17,11 @@ let spotifyApi = new SpotifyWebApi({
 function handleError(error, request, response) {
   console.log(error);
   if (error.response) {
-    // The request was made and the server responded with a status code
-    // that falls out of the range of 2xx
     const { data, status } = error.response;
     response.status(status).send(data);
   } else if (error.request) {
-    // The request was made but no response was received
-    // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-    // http.ClientRequest in node.js
     response.send(500);
   } else {
-    // Something happened in setting up the request that triggered an Error
     response.send(500);
   }
 }
@@ -106,10 +101,23 @@ app.use(
   },
   handleError
 );
-
-app.use("*", proxy({ target: "http://localhost:8080", changeOrigin: true }));
+app.use("^/$", async (req, res) => {
+  console.log(path.join(__dirname, "../dist/index.html"));
+  if (process.env.NODE_ENV === "production") {
+    res.sendFile(path.join(__dirname, "../dist/index.html"));
+  } else {
+    proxy({ target: "http://localhost:8080", changeOrigin: true })(req, res);
+  }
+});
+app.use(
+  "/",
+  process.env.NODE_ENV === "production"
+    ? express.static(path.join(__dirname, "../dist"))
+    : proxy({ target: "http://localhost:8080", changeOrigin: true })
+);
 
 app.listen(3000, async () => {
   console.log("App is listening on port 3000");
+  console.log("Running in ", process.env.NODE_ENV);
   authSpotify();
 });

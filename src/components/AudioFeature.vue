@@ -47,7 +47,7 @@ export default {
     maxedStat() {
       const x = [].concat(this.stats);
       x.sort((a, b) => a[1] < b[1])[0];
-      return x;
+      return x[0];
     },
     maxStatPhrase() {
       const m = this.maxedStat[0];
