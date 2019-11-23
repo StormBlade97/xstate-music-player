@@ -40,14 +40,14 @@ export default {
     },
     stats() {
       const { tracks, currentTrack } = this.currentState.context;
-      return Object.entries(tracks[currentTrack].audioFeature).filter(a =>
+      const temp = Object.entries(tracks[currentTrack].audioFeature).filter(a =>
         statsKey.includes(a[0])
       );
+      temp.sort((a, b) => a[1] < b[1]);
+      return temp;
     },
     maxedStat() {
-      const x = [].concat(this.stats);
-      x.sort((a, b) => a[1] < b[1])[0];
-      return x[0];
+      return this.stats[0];
     },
     maxStatPhrase() {
       const m = this.maxedStat[0];

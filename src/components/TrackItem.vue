@@ -5,7 +5,7 @@
   >
     <div
       class="level-left track-info"
-      :class="isLoading && 'has-flicker-animation'"
+      :class="isLoading && 'has-fade-animation'"
     >
       <div>
         <TrackImg

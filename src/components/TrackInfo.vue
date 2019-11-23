@@ -27,7 +27,7 @@
           <div class="level-left">
             <div class="level-item" v-if="currentTrack.explicit">
               <span
-                class="level-item tag is-black is-rounded is-medium has-text-danger"
+                class="level-item tag has-background-transparent is-medium has-text-danger"
               >
                 <span class="icon">
                   <i class="bx bxs-no-entry bx-xs"></i>
@@ -42,7 +42,7 @@
                 @click="enrich"
               >
                 <span class="icon">
-                  <i class="bx bxl-spotify bx-sm"></i>
+                  <i class="bx bxl-spotify"></i>
                 </span>
                 <span>Get a different match</span>
               </button>
@@ -153,7 +153,6 @@ export default {
   width: 100%;
 }
 .done-bg {
-  padding: 1rem;
   background-image: linear-gradient(
     135deg,
     #81fbb8 10%,

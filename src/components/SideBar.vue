@@ -95,7 +95,6 @@ export default {
   padding: 1rem;
   display: flex;
   overflow-y: auto;
-  margin-bottom: 2rem;
 }
 .logo {
   height: 3.5rem;

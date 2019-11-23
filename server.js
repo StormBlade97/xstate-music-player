@@ -102,9 +102,9 @@ app.use(
   handleError
 );
 app.use("^/$", async (req, res) => {
-  console.log(path.join(__dirname, "../dist/index.html"));
+  console.log(path.join(__dirname, "dist/index.html"));
   if (process.env.NODE_ENV === "production") {
-    res.sendFile(path.join(__dirname, "../dist/index.html"));
+    res.sendFile(path.join(__dirname, "dist/index.html"));
   } else {
     proxy({ target: "http://localhost:8080", changeOrigin: true })(req, res);
   }
@@ -112,7 +112,7 @@ app.use("^/$", async (req, res) => {
 app.use(
   "/",
   process.env.NODE_ENV === "production"
-    ? express.static(path.join(__dirname, "../dist"))
+    ? express.static(path.join(__dirname, "dist"))
     : proxy({ target: "http://localhost:8080", changeOrigin: true })
 );
 

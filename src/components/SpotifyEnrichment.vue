@@ -37,7 +37,7 @@
               @input="manualSearch"
               :value="enrichmentState.context.query"
               type="text"
-              class="input has-text-gradient is-borderless"
+              class="input has-text-white has-background-black is-borderless"
             />
           </div>
         </div>
@@ -45,13 +45,6 @@
 
       <div class="columns main-section">
         <div class="column">
-          <div v-if="enrichmentState.matches('searchingMatches')">
-            <div class="mb">
-              <p class="title is-4">Working on it</p>
-              <p class="subtitle is-6">Getting you a match for</p>
-            </div>
-            <p class="title is-5">{{ enrichmentState.context.query }}</p>
-          </div>
           <div v-if="enrichmentState.matches('searchMatchesFailed')">
             <p class="title">Oh no!</p>
             <p class="subtitle is-6 has-text-danger">
@@ -64,7 +57,12 @@
               Try again
             </button>
           </div>
-          <div v-if="enrichmentState.matches('confirmable')">
+          <div
+            v-if="
+              enrichmentState.matches('confirmable') ||
+                enrichmentState.matches('searchingMatches')
+            "
+          >
             <div v-if="matches.length > 0">
               <p class="title is-4">This could be it</p>
               <div class="mb">
@@ -171,7 +169,6 @@ export default {
     TrackItem,
     VerticalTrackItem
   },
-
   methods: {
     manualSearch(e) {
       this.send({

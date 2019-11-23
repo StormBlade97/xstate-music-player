@@ -1,7 +1,8 @@
 <template>
-  <div class="full-width">
+  <div class="full-width track-list">
     <TrackItem
       class="track-item"
+      :class="index === trackList.length - 1 && 'last-item'"
       v-for="(item, index) in trackList"
       :key="index"
       :item="item"
@@ -57,7 +58,9 @@ export default {
 .track-item {
   padding: 0.5rem 0;
 }
-
+.last-item {
+  margin-bottom: 6rem;
+}
 .full-width {
   width: 100%;
 }
