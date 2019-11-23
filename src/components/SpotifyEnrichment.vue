@@ -4,16 +4,12 @@
     v-if="enrichmentState"
   >
     <div
-      class="is-fullwidth"
       v-if="
         enrichmentState.matches('searchingMatches') ||
           enrichmentState.matches('fetchingMatchDetails')
       "
-    >
-      <progress
-        class="has-fade-in-animation progress progress-bar is-primary"
-      ></progress>
-    </div>
+      class="is-overlay has-radius-medium loading-swiper has-translation-animation"
+    ></div>
     <div class="box track-match-container has-min-height">
       <div
         class="columns widget-section is-vcentered"
