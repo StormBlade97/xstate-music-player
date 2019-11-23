@@ -1,9 +1,10 @@
 {
   "name": "sound-player-xstate",
+  "author": "Thanh Nguyen",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "node server/server.js",
+    "start": "node server.js",
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
@@ -47,6 +48,7 @@
     "sass": "^1.18.0",
     "sass-loader": "^7.1.0",
     "typescript": "^3.6.4",
+    "vue-cli": "^2.9.6",
     "vue-template-compiler": "^2.6.10"
   },
   "gitHooks": {
@@ -57,5 +59,8 @@
       "vue-cli-service lint",
       "git add"
     ]
+  },
+  "engines": {
+    "node": "12.x"
   }
 }
