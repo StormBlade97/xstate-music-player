@@ -2,7 +2,22 @@
   <div class="sidebar-container anchor">
     <div class="upper">
       <div class="header">
-        <div class="logo level"></div>
+        <div class="logo-container">
+          <div class="columns is-vcentered">
+            <p class="column is-narrow">
+              <img
+                class="image is-48x48 has-neon-shadow"
+                :src="iconPath"
+                alt="appicon"
+              />
+            </p>
+            <div class="column">
+              <p class="title is-2 has-text-weight-medium">
+                <span class="has-neon-shadow-text">X</span>Tune
+              </p>
+            </div>
+          </div>
+        </div>
         <UploadButton @loadFile="uploadFile"></UploadButton>
       </div>
       <div class="body">
@@ -25,7 +40,9 @@
       <div>
         <p class="title is-6">
           With love from
-          <a class="has-text-primary" href="http://stormblade97.github.io"
+          <a
+            class="has-neon-shadow-text has-text-gradient"
+            href="http://stormblade97.github.io"
             >Thanh Nguyen</a
           >
         </p>
@@ -34,15 +51,17 @@
       <p class="is-marginless">
         Built with
         <span class="tags is-inline has-addons">
-          <span class="tag is-small is-black">
+          <span class="tag is-small is-black has-text-weight-semibold">
             <span>Vue</span>
             <span class="icon">
               <i class="bx bxl-vuejs is-size-6"></i>
             </span>
           </span>
-          <span class="tag is-small is-black">Xstate</span>
+          <span class="tag is-small is-black has-text-weight-semibold"
+            >Xstate</span
+          >
           <span class="tag is-small is-black has-text-weight-semibold">
-            <span>A lot of</span>
+            <span>Coffee</span>
             <span class="icon">
               <i class="bx bx-coffee is-size-6"></i>
             </span>
@@ -56,6 +75,7 @@
 <script>
 import TrackList from "@/components/TrackList";
 import UploadButton from "@/components/UploadButton";
+import appIcon from "@/assets/icon.png";
 export default {
   components: {
     TrackList,
@@ -75,6 +95,9 @@ export default {
   computed: {
     hasTracks() {
       return this.currentState.context.tracks.length > 0;
+    },
+    iconPath() {
+      return appIcon;
     }
   }
 };
@@ -96,13 +119,13 @@ export default {
   display: flex;
   overflow-y: auto;
 }
-.logo {
+.logo-container {
   height: 3.5rem;
   width: 16rem;
   border-radius: 8px;
   margin: 1rem;
-  background: linear-gradient(75deg, #252525, #c3c3c3);
 }
+
 .sidebar-container {
   display: flex;
   flex-grow: 2;

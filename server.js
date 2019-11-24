@@ -1,10 +1,10 @@
-require("dotenv").config();
 const express = require("express");
 const app = express();
 const proxy = require("http-proxy-middleware");
 const SpotifyWebApi = require("spotify-web-api-node");
 const axios = require("axios");
 const path = require("path");
+const http = require("http");
 
 let access_token = null;
 let expires_in = null;
@@ -14,7 +14,7 @@ let spotifyApi = new SpotifyWebApi({
   clientSecret: process.env.CLIENT_SECRET
 });
 
-function handleError(error, request, response) {
+const handleError = (error, request, response) => {
   console.log(error);
   if (error.response) {
     const { data, status } = error.response;
@@ -24,10 +24,9 @@ function handleError(error, request, response) {
   } else {
     response.send(500);
   }
-}
+};
 
-/* getToken */
-async function authSpotify() {
+const authSpotify = async () => {
   const { CLIENT_ID, CLIENT_SECRET } = process.env;
   const token = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString("base64");
   try {
@@ -49,7 +48,8 @@ async function authSpotify() {
     console.error(error.response);
     setTimeout(authSpotify, 5000);
   }
-}
+};
+
 app.use("/search", async (req, res, next) => {
   const { q } = req.query;
   try {
@@ -70,6 +70,7 @@ app.use("/search", async (req, res, next) => {
     return next(error);
   }
 });
+
 app.use(
   "/enrichment",
   async (request, response, next) => {
@@ -101,6 +102,7 @@ app.use(
   },
   handleError
 );
+
 app.use("^/$", async (req, res) => {
   console.log(path.join(__dirname, "dist/index.html"));
   if (process.env.NODE_ENV === "production") {
@@ -109,6 +111,7 @@ app.use("^/$", async (req, res) => {
     proxy({ target: "http://localhost:8080", changeOrigin: true })(req, res);
   }
 });
+
 app.use(
   "/",
   process.env.NODE_ENV === "production"
@@ -116,7 +119,7 @@ app.use(
     : proxy({ target: "http://localhost:8080", changeOrigin: true })
 );
 
-app.listen(process.env.PORT || 3000, async () => {
+http.createServer(app).listen(process.env.PORT || 3000, async () => {
   console.log("App is listening on port ", process.env.PORT || 3000);
   console.log("Running in ", process.env.NODE_ENV);
   authSpotify();

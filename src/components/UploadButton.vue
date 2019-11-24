@@ -1,5 +1,5 @@
 <template>
-  <div class="file is-primary is-medium is-fullwidth">
+  <div class="file is-medium is-fullwidth">
     <label class="file-label is-fullwidth">
       <input
         type="file"
@@ -8,7 +8,7 @@
         class="file-input"
         @change="updateTrack"
       />
-      <div class="file-cta is-fullwidth">
+      <div class="file-cta has-background-gradient has-text-white is-fullwidth">
         <span class="file-icon icon is-size-4">
           <i class="bx bx-plus"></i>
         </span>

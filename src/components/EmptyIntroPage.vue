@@ -3,7 +3,7 @@
     <section class="section">
       <p class="title is-1">
         Unleash your
-        <span class="has-text-gradient">TuneX</span>.
+        <span class="has-text-gradient has-text-black">Music</span>.
       </p>
       <p class="subtitle">A beautiful music player in your browser</p>
     </section>
@@ -23,7 +23,7 @@
               <i class="bx bx-dollar"></i>
             </div>
             <div>
-              <p class="has-text-weight-medium">
+              <p>
                 Works offline. Your musical experience starts with adding sounds
               </p>
             </div>
@@ -34,9 +34,7 @@
             <div class="is-overlay item-bg feature-knowledge"></div>
             <div>
               <p class="title has-text-weight-semibold">Fast & free</p>
-              <p class="subtitle tagline-text has-text-weight-semibold">
-                and no ads or privacy breach.
-              </p>
+              <p class="subtitle tagline-text">and no ads or privacy breach.</p>
             </div>
             <div class="icon-art is-size-1">
               <i class="bx bx-play"></i>
@@ -55,9 +53,7 @@
 
             <div>
               <p class="title has-text-weight-semibold">Hear more. Know more</p>
-              <p class="subtitle tagline-text has-text-weight-semibold">
-                learn more about your song
-              </p>
+              <p class="subtitle tagline-text">learn more about your song</p>
             </div>
             <div class="icon-art is-size-1">
               <i class="bx bx-book"></i>
@@ -170,6 +166,9 @@ export default {
     bottom: 0;
     background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 60%, transparent);
   }
+  width: 120%;
+  height: 120%;
+  transform: translate(-10%, -10%);
   background-size: cover;
   background-position: center center;
   filter: blur(4px);

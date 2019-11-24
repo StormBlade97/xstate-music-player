@@ -105,7 +105,11 @@ export default {
   align-items: center;
 }
 .default-art {
-  background-image: linear-gradient(60deg, #29323c 0%, #485563 100%);
+  background-image: linear-gradient(
+    to bottom,
+    rgba($primary, 0.1),
+    rgba($secondary, 0.1) 100%
+  );
 
   z-index: 1;
 }

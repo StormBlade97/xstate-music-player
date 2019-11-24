@@ -162,7 +162,7 @@ export default {
 }
 
 .analysis-item {
-  width: 10rem;
+  width: 11rem;
   height: 6rem;
 }
 .main-stat {
